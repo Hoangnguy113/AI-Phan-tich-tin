@@ -32,7 +32,7 @@ EN: dict[str, str] = {
     "Cài đặt chung": "General settings",
     "Tài khoản Claude": "Claude account",
     "Quản lý luồng kịch bản": "Script flow management",
-    "Ctrl+1…8: chuyển mục": "Ctrl+1…8: switch section",
+    "Ctrl+1…9: chuyển mục": "Ctrl+1…9: switch section",
     "Đội agent": "Agent team",
     "Hợp đồng & tỉ lệ đạt": "Contracts & pass rate",
     # chung
@@ -130,6 +130,17 @@ EN: dict[str, str] = {
     "Tỉ lệ đạt": "Pass rate", "Chưa có lượt chạy Gemini nào.": "No Gemini runs yet.",
     "N lượt gần nhất: ": "Last N runs: ", "tất cả": "all",
 }
+
+
+from . import page_cost as _pc, page_koc as _pk          # noqa: E402  bản dịch do từng trang khai báo
+EN.update(_pk.EN)
+EN.update(_pc.EN)
+EN[_pk.TITLE_VI] = _pk.TITLE_EN
+EN[_pc.TITLE_VI] = _pc.TITLE_EN
+EN.update({"<b>Chi phí theo luồng</b>": "<b>Cost per flow</b>",
+           "<b>Model Gemini đang nghỉ</b>": "<b>Gemini models on cooldown</b>"})
+for _k in [k for k, v in EN.items() if k == v]:      # bản dịch trùng chữ gốc là vô nghĩa (và test cấm)
+    del EN[_k]
 
 
 def _tr(w: QWidget, slot: str, cur: str, lang: str) -> str:

@@ -18,6 +18,7 @@ from ..koc.export import write_koc_prompts
 from ..storage.db import BudgetExceeded, Store
 from .agents import AgentError, AgentResult, AgentRunner, AgentSpec, extract_json
 from . import export
+from .survey import SurveyResult, gap_hints, read_survey
 
 MAX_QA_ROUNDS = 2          # mục 4 / 9
 QA_PASS = 8.0
@@ -45,6 +46,8 @@ class Pipeline:
     today: date
     out_root: Path
     concurrency: int = 3
+    warm_start: bool = True        # 18.7: một lượt gọi đơn lẻ trước khi bung song song (tránh đua làm mới OAuth token)
+    enrich_agents: tuple = ()      # vd. ("keyword-miner", "competitor-gap-analyst"): chạy theo từng đề tài, mặc định tắt
     timeout_sec: dict = field(default_factory=lambda: dict(TIMEOUT_SEC))
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     errors: list[str] = field(default_factory=list)
@@ -75,11 +78,61 @@ class Pipeline:
             raise
         return extract_json(res.text)
 
+    async def enrich(self, story: dict) -> dict:
+        """keyword-miner (08) / competitor-gap-analyst (09), tuỳ chọn. Lỗi một agent không dừng kịch bản."""
+        out: dict = {}
+        for name in self.enrich_agents:
+            if name not in self.agents:
+                continue
+            try:
+                res = read_survey(await self.call(name, {"task": "enrich", "story": story}))
+            except BudgetExceeded:
+                raise
+            except (AgentError, ValueError) as e:
+                self.errors.append(f"{name}: {e}")
+                continue
+            out[name] = res.as_dict()
+            hints = gap_hints(res.items)
+            if hints:
+                out["gap_hints"] = hints
+        return out
+
+    async def survey(self) -> list[dict]:
+        """Chạy các scout (song song tối đa `concurrency`), đọc cả hai dạng đầu ra; lỗi một nguồn không dừng pipeline."""
+        sem = asyncio.Semaphore(max(self.concurrency, 1))
+
+        async def one(n):
+            async with sem:
+                return await self.call(n, {"task": "scout"})
+
+        results: list = []
+        names = list(SCOUTS)
+        if self.warm_start and names:
+            first = names.pop(0)                       # lượt đơn lẻ đầu tiên: làm ấm đăng nhập trước khi song song
+            results.append((first, (await asyncio.gather(one(first), return_exceptions=True))[0]))
+        rest = await asyncio.gather(*[one(n) for n in names], return_exceptions=True)
+        results += list(zip(names, rest))
+        out = []
+        for n, r in results:
+            if isinstance(r, BudgetExceeded):
+                raise r
+            if isinstance(r, Exception):
+                self.errors.append(f"{n}: {r}")          # lỗi một nguồn không dừng pipeline (mục 14)
+                continue
+            sv: SurveyResult = read_survey(r)
+            if not sv.items and sv.reason:
+                self.errors.append(f"{n}: {sv.reason}")
+            if sv.dropped:
+                self.errors.append(f"{n}: bỏ {sv.dropped} mục không phải đối tượng JSON")
+            out.append(sv.as_dict(n))
+        return out
+
     # ---- một kịch bản ---------------------------------------------------------
     async def make_script(self, story: dict) -> tuple[StoryOutcome, dict | None, str]:
         title = story["title"]
         try:
-            plan = await self.call("content-strategist", {"story": story})
+            insights = await self.enrich(story)
+            plan = await self.call("content-strategist", {"story": story, **({"insights": insights} if insights else {})})
             dossier = await self.call("deep-researcher", {"plan": plan})
             facts = await self.call("fact-checker", {"dossier": dossier})
 
@@ -133,15 +186,7 @@ class Pipeline:
         outcomes: list[StoryOutcome] = []
         status = "ok"
         try:
-            scouts = await asyncio.gather(*[self.call(n, {"task": "scout"}) for n in SCOUTS], return_exceptions=True)
-            items = []
-            for n, r in zip(SCOUTS, scouts):
-                if isinstance(r, BudgetExceeded):
-                    raise r
-                if isinstance(r, Exception):
-                    self.errors.append(f"{n}: {r}")          # lỗi một nguồn không dừng pipeline (mục 14)
-                else:
-                    items.append(r)
+            items = await self.survey()
             clusters = await self.call("dedup-cluster", {"scouts": items})
             ranked = await self.call("trend-scorer", {"stories": clusters["stories"],
                                                        "take": int(self.flow.daily_quota * OVERSAMPLE + 0.999)})
@@ -187,6 +232,7 @@ class Pipeline:
                 status = f"thiếu sản lượng: {passed}/{self.flow.daily_quota} (không hạ ngưỡng QA)"
         except BudgetExceeded as e:
             status = f"dừng vì hết ngân sách: {e}"
+        self.errors.extend(w for w in getattr(self.runner, "warnings", []) if w not in self.errors)
         spent = self.store.spent_today(self.flow.id, self.today)
         report = export.daily_report(self.flow.id, day, [o.__dict__ for o in outcomes], spent, status, self.errors)
         rdir = Path(self.out_root) / day / self.flow.id

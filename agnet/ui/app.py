@@ -14,6 +14,8 @@ from .page_agents import AgentsPage
 from .page_contracts import ContractsPage
 from .page_flows import FlowsPage
 from .page_gemini import GeminiPage
+from .page_cost import CostPage
+from .page_koc import KocPage
 from .page_library import LibraryPage
 from .page_runs import RunsPage
 from .page_settings import SettingsPage
@@ -36,15 +38,19 @@ class MainWindow(QMainWindow):
         self.gemini = GeminiPage(settings_path, env_path)
         self.agents = AgentsPage()
         self.contracts = ContractsPage(db_path)
+        self.koc = KocPage()
+        self.cost = CostPage(flows_path, db_path)
+        self.cost.changed.connect(self.runs.refresh)
         self.gemini.changed.connect(self.apply_settings)
         self.flows.changed.connect(self.runs.refresh)
         self.general.changed.connect(self.apply_settings)
 
-        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…8: chuyển mục")
+        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…9: chuyển mục")
         for title, page in (("Bảng điều khiển", self.runs), ("Kho kịch bản", self.library),
                             ("Cài đặt luồng", self.flows), ("Gemini", self.gemini),
-                            ("Đội agent", self.agents), ("Hợp đồng & tỉ lệ đạt", self.contracts), ("Cài đặt chung", self.general),
-                            ("Tài khoản Claude", self.account)):
+                            ("Đội agent", self.agents), ("Hợp đồng & tỉ lệ đạt", self.contracts),
+                            ("Nhân vật KOC", self.koc), ("Chi phí & hạn mức", self.cost),
+                            ("Cài đặt chung", self.general), ("Tài khoản Claude", self.account)):
             self.shell.add_page(title, page)
         self.setCentralWidget(self.shell)
         self.statusBar().showMessage(f"flows: {flows_path}   ·   db: {db_path}")

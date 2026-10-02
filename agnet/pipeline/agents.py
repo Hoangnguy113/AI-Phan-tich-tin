@@ -22,6 +22,7 @@ class AgentSpec:
     tools: list[str]
     skills: list[str]
     prompt: str
+    engine: str = "claude"       # claude | gemini (mục 18); gemini chỉ có hiệu lực khi cài đặt bật provider
 
 
 @dataclass
@@ -44,7 +45,8 @@ def load_agents(directory: Path | str = AGENT_DIR) -> dict[str, AgentSpec]:
         meta = yaml.safe_load(m.group(1))
         tools = [t.strip() for t in str(meta.get("tools", "")).split(",") if t.strip()]
         spec = AgentSpec(meta["name"], meta["description"], meta.get("model", "sonnet"), tools,
-                         meta.get("skills") or [], m.group(2).strip())
+                         meta.get("skills") or [], m.group(2).strip(),
+                         str(meta.get("engine", "claude")).strip().lower() or "claude")
         if spec.name in specs:
             raise AgentError(f"trùng tên agent {spec.name}")
         specs[spec.name] = spec

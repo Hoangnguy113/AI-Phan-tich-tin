@@ -244,12 +244,12 @@ def test_khong_sot_chu_viet_co_dinh_khi_chuyen_english(qapp, tmp_path):
     win = MainWindow(flows, tmp_path / "a.db", tmp_path / "s.json", tmp_path / ".env", tmp_path / "out")
     i18n.apply(win, "en")
     # nhãn động do ứng dụng dựng lúc chạy (f-string) — đã nêu là giới hạn trong i18n.py
-    dong = {"info", "msg", "note", "state", "warn", "key_state", "times_note", "mix_sum", "count", "head", "flags", "msg"}
+    dong = {"info", "msg", "note", "state", "warn", "key_state", "times_note", "mix_sum", "count", "head", "flags", "msg", "summary", "cool_note", "header", "status_note"}
     sot = []
     for w, slot, text in _texts(win):
         if any(ch in VN for ch in text.lower()) and not any(getattr(win, a, None) is w or
                                                            getattr(getattr(win, p, None), a, None) is w
-                                                           for p in ("runs", "library", "flows", "general", "account")
+                                                           for p in ("runs", "library", "flows", "general", "account", "koc", "cost")
                                                            for a in dong):
             sot.append((type(w).__name__, slot, text))
     assert not sot, f"còn chữ Việt chưa có bản dịch: {sot}"
