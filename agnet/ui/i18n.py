@@ -10,7 +10,7 @@ chưa có bản dịch và vẫn hiện tiếng Việt.
 from __future__ import annotations
 
 from PySide6.QtWidgets import (QAbstractButton, QAbstractSpinBox, QComboBox, QGroupBox, QLabel,
-                               QLineEdit, QMainWindow, QPlainTextEdit, QTabWidget, QTableWidget,
+                               QLineEdit, QListWidget, QMainWindow, QPlainTextEdit, QTabWidget, QTableWidget,
                                QWidget)
 
 EN: dict[str, str] = {
@@ -31,6 +31,8 @@ EN: dict[str, str] = {
     "Báo cáo ngày": "Daily report",
     "Cài đặt chung": "General settings",
     "Tài khoản Claude": "Claude account",
+    "Quản lý luồng kịch bản": "Script flow management",
+    "Ctrl+1…5: chuyển mục": "Ctrl+1…5: switch section",
     # chung
     "Lưu": "Save",
     "Bỏ thay đổi": "Discard changes",
@@ -124,6 +126,9 @@ def apply(root: QWidget, lang: str) -> None:
         elif isinstance(w, QTabWidget):
             for i in range(w.count()):
                 w.setTabText(i, _tr(w, f"tab{i}", w.tabText(i), lang))
+        elif isinstance(w, QListWidget):
+            for i in range(w.count()):
+                w.item(i).setText(_tr(w, f"row{i}", w.item(i).text(), lang))
         elif isinstance(w, QComboBox):
             for i in range(w.count()):
                 w.setItemText(i, _tr(w, f"item{i}", w.itemText(i), lang))
