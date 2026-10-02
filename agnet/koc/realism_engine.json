@@ -1,0 +1,32 @@
+{
+  "version": "koc-master-1.0",
+  "_note": "LỚP B dùng chung mọi nhân vật. KHÔNG sửa tay từng nhân vật; đổi ở đây thì nâng version và chạy lại tests/test_koc.py.",
+  "realism_engine": {
+    "medium": "unretouched digital photograph, straight out of camera",
+    "camera_body": "Sony A7 IV",
+    "lens": "85mm f/1.8 prime",
+    "aperture": "f/2.0",
+    "exposure": "1/250s, ISO 400",
+    "focus": "critical focus on the near eye, shallow depth of field, background falls softly out of focus",
+    "film_emulation": "Kodak Portra 400 colour response, gentle highlight rolloff",
+    "grain": "fine natural sensor grain, slightly stronger in the shadows",
+    "optical_truth": [
+      "subtle chromatic aberration at the frame edges",
+      "mild lens vignetting",
+      "exactly one soft specular catchlight per eye, matching the key-light direction",
+      "a few loose hair strands slightly out of place"
+    ],
+    "skin_rendering": "visible pores, micro-texture, uneven tone, peach fuzz catching the light, natural sebum highlights, faint blemish left in place — never smoothed, never plastic, never airbrushed",
+    "lighting_rule": "exactly one identifiable key source with a stated direction; shadows must fall consistently on face, neck, clothing, wall and floor",
+    "composition_rule": "slightly off-centre, imperfect framing as if captured in the moment, with breathing room around the subject",
+    "expression_rule": "one micro-expression in progress — a half-formed smile, eyes focused on something specific — never a held, posed look",
+    "colour": "natural white balance, no HDR, no global glow, contrast of a lightly curved RAW file"
+  },
+  "negative": "plastic skin, airbrushed, poreless, wax figure, doll-like, beauty filter, smoothing, perfect symmetry, flawless, masterpiece, 8k, ultra detailed, hyperdetailed, HDR, global glow, bloom, oversaturated, teal-and-orange grade, studio flat lighting with no direction, two or more catchlights per eye, inconsistent shadows, extra fingers, fused fingers, six fingers, deformed hands, warped ears, crossed eyes, mismatched irises, floating jewellery, text artefacts, watermark, logo, body-measurement look, exaggerated proportions, CGI render, 3D render, illustration, anime, oil painting",
+  "negative_video": "morphing face, identity drift between frames, sliding features, warping hands, jittery teeth, mouth flapping out of sync, sudden lighting change, extra limbs appearing, background objects popping in and out",
+  "video_motion_defaults": {
+    "camera_move": "locked-off tripod, almost imperceptible handheld drift",
+    "lip_sync": "lip shapes must match the dialogue; no mouth morphing between words",
+    "no_cut": "single continuous take, no cut, no zoom punch"
+  }
+}

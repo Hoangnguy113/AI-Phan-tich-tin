@@ -1,0 +1,34 @@
+# Mẫu luồng. Mỗi luồng = 1 đơn vị chạy. Xem mục 3 của KE_HOACH_AGNET.md.
+flows:
+  - id: suckhoe-yt-sang
+    name: "Sức khỏe – YouTube sáng"
+    enabled: true
+    topic: "Sức khỏe & dinh dưỡng thường thức"
+    seed_keywords: ["tiểu đường", "huyết áp", "giấc ngủ", "ăn uống lành mạnh"]
+    exclude_keywords: ["quảng cáo thuốc"]
+    audience: "Người 30–55 tuổi tại Việt Nam, quan tâm phòng bệnh"
+    region: VN
+    language: vi
+    output_language: vi
+    platform: youtube
+    aspect_ratio: "16:9"
+    duration_min: 3
+    duration_max: 20
+    duration_mix: {15-20: 0, 3-5: 0, 8-12: 1}
+    daily_quota: 1
+    schedule: [30 5 * * *]
+    timezone: Asia/Bangkok
+    sources: [google_trends, youtube, rss_vn, pubmed, who, moh]
+    tone: "Chuyên gia gần gũi, dễ hiểu, có số liệu"
+    narrator_persona: "Bác sĩ trẻ, xưng 'mình', gọi 'bạn'"
+    title_style: curiosity
+    strict_factcheck: true
+    sensitive: true
+    human_review: true
+    max_cost_usd_per_day: 1
+    output_dir: output
+    # --- chạy tự động hằng ngày ---
+    catchup: true            # máy tắt lúc 5:30 → chạy bù ngay khi bật lại
+    catchup_until: "12:00"   # nhưng chỉ bù nếu còn trước 12:00 trưa (giờ Asia/Bangkok)
+    run_timeout_min: 180     # quá 3 giờ chưa xong thì dừng, báo lỗi, chờ ngày mai
+    notify: [telegram]       # báo kết quả qua Telegram (khoá đặt trong .env)

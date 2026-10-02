@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "Phạm Quốc Hùng",
+    "region": "Hà Nội",
+    "niche": "kinh doanh, quản trị, bài học thương trường, bất động sản",
+    "main_platform": "youtube/facebook",
+    "voice": "Bắc, trầm, chậm, ngắt câu dứt khoát",
+    "trigger_token": "koc04hung man"
+  },
+  "identity": {
+    "character_id": "KOC-04-HUNG",
+    "reference_images": [
+      "refs/koc-04-hung/master_front.png",
+      "refs/koc-04-hung/sheet_three_quarter.png",
+      "refs/koc-04-hung/sheet_profile.png"
+    ],
+    "demographics": "Vietnamese man, 45 years old, from Hanoi",
+    "face_structure": "broad square face, heavy brow ridge, deep nasolabial folds, strong jaw",
+    "asymmetry": "grey hair at the temples is about 30 percent denser on the left than the right; the two forehead lines are unequal, the upper one 3mm longer on the right; the left eyebrow arches about 2mm higher",
+    "identity_marks": [
+      "small callus on the right middle finger at the first joint",
+      "sun spots clustered on the forehead above the right eyebrow",
+      "deep vertical crease between the eyebrows"
+    ],
+    "eyes": "dark brown, deep-set under a heavy brow, steady gaze, crow's feet and bags kept",
+    "nose": "broad bridge, slightly bulbous tip, visible pores",
+    "lips": "thin, firm line, dry skin, faint downward set at rest",
+    "teeth": "natural off-white with slight natural yellowing, one lower incisor slightly rotated",
+    "hair": "black with grey at the temples, side part, thinning at the hairline",
+    "skin": "tanned weathered skin, coarse texture, visible pores, sun spots on the forehead, five-o'clock shadow, no retouching",
+    "build": "1m72, solid, broad shoulders, sits leaning slightly back",
+    "hands": "broad hands, thick fingers, dry skin, a small callus on the right middle finger",
+    "signature_items": [
+      "large steel watch on the left wrist",
+      "metal pen clipped to the shirt pocket"
+    ],
+    "persona": "seasoned, low and slow; tells true stories without flourish; pauses decisively between sentences"
+  },
+  "defaults": {
+    "setting": "small meeting room or old coffee shop, dark wood, curtains, large window behind",
+    "key_light": "window light camera-left, deeper contrast, visible shadow side",
+    "fill": "no fill on camera-right",
+    "wardrobe_palette": "white or navy shirt with rolled sleeves, dark blazer without tie"
+  }
+}

@@ -1,0 +1,521 @@
+{
+  "schema_version": "1.0",
+  "id": "2026-10-01_suckhoe-yt-sang_01",
+  "flow_id": "suckhoe-yt-sang",
+  "platform": "youtube",
+  "aspect_ratio": "16:9",
+  "language": "vi",
+  "target_duration_sec": 288.0,
+  "wpm": 160,
+  "title": "5 sai lầm khi ăn sáng",
+  "narrator": {
+    "persona": "Bác sĩ trẻ"
+  },
+  "segments": [
+    {
+      "id": "S1",
+      "name": "Phân đoạn 1",
+      "start_sec": 0.0,
+      "end_sec": 72.0,
+      "scenes": [
+        {
+          "id": "S1.1",
+          "start_sec": 0.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.1"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.2",
+          "start_sec": 9.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.2"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.3",
+          "start_sec": 18.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.3"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.4",
+          "start_sec": 27.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.4"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.5",
+          "start_sec": 36.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.5"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.6",
+          "start_sec": 45.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.6"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.7",
+          "start_sec": 54.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.7"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S1.8",
+          "start_sec": 63.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 1.8"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S2",
+      "name": "Phân đoạn 2",
+      "start_sec": 72.0,
+      "end_sec": 144.0,
+      "scenes": [
+        {
+          "id": "S2.1",
+          "start_sec": 72.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.1"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.2",
+          "start_sec": 81.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.2"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.3",
+          "start_sec": 90.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.3"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.4",
+          "start_sec": 99.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.4"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.5",
+          "start_sec": 108.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.5"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.6",
+          "start_sec": 117.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.6"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.7",
+          "start_sec": 126.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.7"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S2.8",
+          "start_sec": 135.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 2.8"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S3",
+      "name": "Phân đoạn 3",
+      "start_sec": 144.0,
+      "end_sec": 216.0,
+      "scenes": [
+        {
+          "id": "S3.1",
+          "start_sec": 144.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.1"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.2",
+          "start_sec": 153.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.2"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.3",
+          "start_sec": 162.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.3"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.4",
+          "start_sec": 171.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.4"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.5",
+          "start_sec": 180.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.5"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.6",
+          "start_sec": 189.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.6"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.7",
+          "start_sec": 198.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.7"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S3.8",
+          "start_sec": 207.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 3.8"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "name": "Phân đoạn 4",
+      "start_sec": 216.0,
+      "end_sec": 288.0,
+      "scenes": [
+        {
+          "id": "S4.1",
+          "start_sec": 216.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.1"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.2",
+          "start_sec": 225.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.2"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.3",
+          "start_sec": 234.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.3"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.4",
+          "start_sec": 243.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.4"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.5",
+          "start_sec": 252.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.5"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.6",
+          "start_sec": 261.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.6"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.7",
+          "start_sec": 270.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.7"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        },
+        {
+          "id": "S4.8",
+          "start_sec": 279.0,
+          "duration_sec": 9.0,
+          "voiceover": "từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ từ",
+          "visual": {
+            "type": "broll",
+            "description": "cảnh 4.8"
+          },
+          "transition_out": "cut",
+          "source_ids": [
+            "src_01"
+          ]
+        }
+      ]
+    }
+  ],
+  "packaging": {
+    "titles": [
+      {
+        "text": "5 sai lầm khi ăn sáng",
+        "technique": "number",
+        "truth_check": "Số liệu có nguồn src_01"
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "src_01",
+      "title": "WHO",
+      "url": "https://who.int",
+      "verified": true
+    }
+  ],
+  "qa": {
+    "score": 8.6,
+    "flags": [],
+    "human_review_required": true
+  },
+  "trend": {
+    "score": 87
+  }
+}

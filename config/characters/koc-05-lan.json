@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "Bùi Thị Lan",
+    "region": "Huế",
+    "niche": "đông y, ẩm thực truyền thống, mẹo dân gian, sống khỏe tuổi trung niên",
+    "main_platform": "facebook/youtube",
+    "voice": "Huế nhẹ, chậm, ấm, hay dùng thành ngữ",
+    "trigger_token": "koc05lan woman"
+  },
+  "identity": {
+    "character_id": "KOC-05-LAN",
+    "reference_images": [
+      "refs/koc-05-lan/master_front.png",
+      "refs/koc-05-lan/sheet_three_quarter.png",
+      "refs/koc-05-lan/sheet_profile.png"
+    ],
+    "demographics": "Vietnamese woman, 55 years old, from Hue",
+    "face_structure": "soft heart-shaped face, hollowing under the cheekbones, crow's feet and smile lines kept",
+    "asymmetry": "the upper eyelid on the right droops about 1.5mm more than the left; the smile lifts about 2mm higher on the right and shows the crooked tooth; the left cheek mole sits about 3mm lower than the eye line",
+    "identity_marks": [
+      "large faint mole on the left cheekbone, 2cm below the outer eye corner",
+      "one crooked canine tooth on the right side of the smile",
+      "age spots on both temples and the back of both hands"
+    ],
+    "eyes": "dark brown, kind, soft creases, slightly uneven upper lids, faint under-eye bags",
+    "nose": "small straight bridge, soft rounded tip",
+    "lips": "thin-medium, muted rose, fine vertical lines, no lip colour",
+    "teeth": "natural, slightly yellowed, crooked right canine",
+    "hair": "black with natural grey strands, pulled back into a low knot, thinner at the parting",
+    "skin": "warm medium tone, mature texture, visible fine wrinkles, age spots on the temples and the back of the hands, visible pores, no retouching",
+    "build": "1m55, rounded, naturally slightly bent back",
+    "hands": "working hands, short nails, prominent veins, slightly swollen finger joints",
+    "signature_items": [
+      "small pearl bracelet on the left wrist",
+      "checked cloth scarf over the shoulder"
+    ],
+    "persona": "gentle and warm; slow Hue cadence; uses proverbs; advises like talking to her own grandchildren"
+  },
+  "defaults": {
+    "setting": "central-Vietnam garden-house courtyard or kitchen, bamboo trays, drying herbs, yellow lime-washed wall",
+    "key_light": "open shade daylight from the courtyard, soft wrap",
+    "fill": "warm bounce from the yellow wall",
+    "wardrobe_palette": "coarse-cotton ao ba ba, small-print blouse, checked scarf"
+  }
+}

@@ -1,0 +1,11 @@
+# Danh sách nhân vật KOC và nhân vật mặc định của từng luồng (mục 17.12).
+characters:
+  - {id: KOC-01-MAI,  file: koc-01-mai.json,  status: draft}   # chưa có ảnh gốc
+  - {id: KOC-02-THAO, file: koc-02-thao.json, status: draft}
+  - {id: KOC-03-DUY,  file: koc-03-duy.json,  status: draft}
+  - {id: KOC-04-HUNG, file: koc-04-hung.json, status: draft}
+  - {id: KOC-05-LAN,  file: koc-05-lan.json,  status: draft}
+# status: draft = mới có chữ, CHƯA có ảnh gốc + bảng 9 ảnh → chưa được bật cho luồng thật
+#         ready = đã duyệt ảnh gốc, bảng nhân vật, và test 3 cảnh (mục 18, bước 4)
+default_by_flow:
+  suckhoe-yt-sang: KOC-02-THAO

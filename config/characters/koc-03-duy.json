@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "Trần Anh Duy",
+    "region": "TP.HCM",
+    "niche": "công nghệ, AI, tài chính cá nhân, năng suất",
+    "main_platform": "youtube",
+    "voice": "Nam, nhanh, rõ, hay dùng con số",
+    "trigger_token": "koc03duy man"
+  },
+  "identity": {
+    "character_id": "KOC-03-DUY",
+    "reference_images": [
+      "refs/koc-03-duy/master_front.png",
+      "refs/koc-03-duy/sheet_three_quarter.png",
+      "refs/koc-03-duy/sheet_profile.png"
+    ],
+    "demographics": "Vietnamese man, 28 years old, from Ho Chi Minh City",
+    "face_structure": "angular face, defined jaw, straight thick eyebrows, prominent cheekbones",
+    "asymmetry": "the right upper eyelid droops about 1mm lower than the left; stubble is denser on the left cheek than the right; the left corner of the mouth sits about 1.5mm higher when he talks",
+    "identity_marks": [
+      "small mole beside the right nostril, 3mm from the nose wing",
+      "one small healing blemish on the left cheek, 2cm below the eye",
+      "faint horizontal crease across the bridge of the nose"
+    ],
+    "eyes": "dark brown, slightly hooded right lid, direct and quick gaze, faint dark circles",
+    "nose": "straight bridge, defined tip, slightly enlarged pores on the nose",
+    "lips": "thin-medium, natural dry texture, slight asymmetry when speaking",
+    "teeth": "natural off-white, slightly crowded lower incisors",
+    "hair": "black, short textured crop, slightly messy fringe, visible scalp at the crown, a cowlick at the front-right",
+    "skin": "medium olive tone, enlarged pores on the nose, one small healing blemish on the left cheek, oily forehead sheen, two-day uneven stubble, no retouching",
+    "build": "slim and fit, 1m74, slight forward shoulder lean",
+    "hands": "clean square-cut nails, prominent knuckles, visible tendons on the back of the hand",
+    "signature_items": [
+      "brown leather strap watch with a round face on the left wrist",
+      "thin black-frame non-prescription glasses"
+    ],
+    "persona": "direct, fast and clear; likes numbers; blunt about uncomfortable truths with dry humour"
+  },
+  "defaults": {
+    "setting": "minimal work corner, blurred monitor behind him, bookshelf, warm LED lamp behind his shoulder",
+    "key_light": "key softbox camera-right at 30 degrees, warm practical lamp behind his left shoulder as rim light",
+    "fill": "dark falloff background, no fill on the shadow side",
+    "wardrobe_palette": "plain black/grey tee, light blue oxford shirt, thin bomber jacket"
+  }
+}

@@ -1,0 +1,29 @@
+# Luồng chạy thử lần đầu để ĐO chi phí thật: 2 kịch bản, trần $3/ngày. Không thay thế flows.yaml.
+flows:
+  - id: suckhoe-yt-sang
+    name: "Sức khỏe – YouTube sáng (chạy thử)"
+    enabled: true
+    topic: "Sức khỏe & dinh dưỡng thường thức"
+    seed_keywords: ["tiểu đường", "huyết áp", "giấc ngủ", "ăn uống lành mạnh"]
+    exclude_keywords: ["quảng cáo thuốc"]
+    audience: "Người 30–55 tuổi tại Việt Nam, quan tâm phòng bệnh"
+    region: VN
+    language: vi
+    output_language: vi
+    platform: youtube
+    aspect_ratio: "16:9"
+    duration_min: 3
+    duration_max: 20
+    duration_mix: {"3-5": 1, "8-12": 1}
+    daily_quota: 2
+    schedule: ["30 5 * * *"]
+    timezone: Asia/Bangkok
+    sources: [google_trends, youtube, rss_vn, pubmed, who, moh]
+    tone: "Chuyên gia gần gũi, dễ hiểu, có số liệu"
+    narrator_persona: "Người dẫn chương trình trẻ, xưng 'mình', gọi 'bạn'"
+    title_style: curiosity
+    strict_factcheck: true
+    sensitive: true
+    human_review: true
+    max_cost_usd_per_day: 3
+    output_dir: output

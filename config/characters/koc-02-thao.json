@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "Lê Thu Thảo",
+    "region": "Đà Nẵng",
+    "niche": "sức khỏe thường thức, mẹ & bé, dinh dưỡng, chăm sóc gia đình",
+    "main_platform": "youtube/facebook",
+    "voice": "Trung pha Bắc, chậm rãi rõ ràng, hay dừng để nhấn",
+    "trigger_token": "koc02thao woman"
+  },
+  "identity": {
+    "character_id": "KOC-02-THAO",
+    "reference_images": [
+      "refs/koc-02-thao/master_front.png",
+      "refs/koc-02-thao/sheet_three_quarter.png",
+      "refs/koc-02-thao/sheet_profile.png"
+    ],
+    "demographics": "Vietnamese woman, 30 years old, from Da Nang",
+    "face_structure": "round-oval face, full cheeks, gentle rounded jaw, soft chin",
+    "asymmetry": "the nasal bridge deviates about 1.5mm to the right; right eyebrow sits about 1.5mm lower than the left; smile lifts slightly higher on the left side",
+    "identity_marks": [
+      "small flat mole 5mm to the right of the mouth corner",
+      "fine crow's-feet lines at the outer corner of both eyes when she smiles",
+      "light melasma patch about 2cm wide on the right cheekbone"
+    ],
+    "eyes": "dark brown, slightly rounded, gentle lids, soft under-eye pigmentation, warm and attentive",
+    "nose": "slightly broad bridge tilting very faintly right, soft rounded tip",
+    "lips": "medium, natural rose-brown, faint vertical lines, no lip colour",
+    "teeth": "natural off-white, even, small gap of 0.5mm between the upper central incisors",
+    "hair": "dark brown, worn in a low loose bun, a few strands escaping at the temples, fine baby hairs at the hairline",
+    "skin": "medium warm tone, light melasma on the right cheekbone, slight under-eye pigmentation, visible pores, fine texture, no concealer, no retouching",
+    "build": "average, 1m58, slightly rounded after childbirth, straight back",
+    "hands": "bare short nails, soft skin with visible knuckle creases, a faint ring mark on the left hand",
+    "signature_items": [
+      "plain gold wedding band on the left ring finger",
+      "small wooden hair clip"
+    ],
+    "persona": "calm, trustworthy older-sister voice; pauses to emphasise a point; explains patiently, never lectures"
+  },
+  "defaults": {
+    "setting": "bright family kitchen, wooden shelf, basket of vegetables; or a living-room corner with a leafy plant",
+    "key_light": "large soft window light from the front-left, warm 5000K, soft shadow under the chin",
+    "fill": "gentle bounce from a pale wall, no artificial fill",
+    "wardrobe_palette": "pastel linen shirt, thin knit sweater, coarse-cotton apron"
+  }
+}

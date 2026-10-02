@@ -1,0 +1,21 @@
+# Trọng số Trend Score (mục 5 KE_HOACH_AGNET.md). Tổng = 1.00.
+# Analytics Learner được phép sửa file này (qua agnet.core.scoring.save_weights); mỗi lần sửa lưu bản cũ.
+weights:
+  velocity: 0.22
+  volume: 0.18
+  engagement: 0.15
+  gap: 0.15
+  audience_fit: 0.10
+  evergreen: 0.08
+  impact: 0.07
+  source_trust: 0.05
+# Luồng mode=breaking ưu tiên velocity.
+breaking_overrides:
+  velocity: 0.40
+  volume: 0.15
+  engagement: 0.15
+  gap: 0.10
+  audience_fit: 0.08
+  evergreen: 0.02
+  impact: 0.05
+  source_trust: 0.05

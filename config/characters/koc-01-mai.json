@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "name": "Nguyễn Hà Mai",
+    "region": "Hà Nội",
+    "niche": "làm đẹp, thời trang, review đồ dùng, xu hướng giới trẻ",
+    "main_platform": "tiktok",
+    "voice": "Bắc, trẻ, nói nhanh câu ngắn",
+    "trigger_token": "koc01mai woman"
+  },
+  "identity": {
+    "character_id": "KOC-01-MAI",
+    "reference_images": [
+      "refs/koc-01-mai/master_front.png",
+      "refs/koc-01-mai/sheet_three_quarter.png",
+      "refs/koc-01-mai/sheet_profile.png"
+    ],
+    "demographics": "Vietnamese woman, 22 years old, from Hanoi",
+    "face_structure": "oval face with a slightly wide forehead, soft jawline, medium-high cheekbones, small chin",
+    "asymmetry": "left eyebrow sits about 2mm higher than the right; smile pulls slightly to the left; right eye opens marginally wider",
+    "identity_marks": [
+      "small flat mole 1cm below the outer corner of the left eye",
+      "faint 4mm pale scar through the tail of the right eyebrow",
+      "two tiny freckles on the bridge of the nose"
+    ],
+    "eyes": "dark brown, almond-shaped, thin natural crease, faint under-eye shadow, slightly uneven lower lash line",
+    "nose": "straight bridge, rounded tip, narrow nostrils",
+    "lips": "medium-full, defined cupid's bow, natural mauve tone, faint vertical lip lines, lower lip slightly chapped",
+    "teeth": "natural off-white, upper left incisor overlaps the neighbour by 0.5mm",
+    "hair": "black-brown, shoulder-length with a soft middle part, individual loose strands at the hairline, a few frizzy ends, natural scalp visible at the parting",
+    "skin": "warm light-medium beige, visible pores on cheeks and nose, light peach fuzz along the jaw, faint redness on the chin and around the nostrils, natural sebum sheen on the T-zone, no retouching",
+    "build": "slim, 1m62, natural shoulder line, relaxed posture",
+    "hands": "slender fingers, short nude manicure, visible knuckle creases and fine skin texture, one faint vein on the back of the hand",
+    "signature_items": [
+      "thin gold chain with a tiny crescent-moon pendant",
+      "small freshwater pearl stud earrings"
+    ],
+    "persona": "friendly, quick-witted, speaks fast with short sentences; habit of tilting her head when she asks a question"
+  },
+  "defaults": {
+    "setting": "small Hanoi apartment, white tiled wall, wooden table, natural window light",
+    "key_light": "soft window daylight at camera-left, 45 degrees to her face",
+    "fill": "white wall bounce on her right cheek, no artificial fill",
+    "wardrobe_palette": "cream, beige, pale blue; oversized cotton-linen, light-wash jeans"
+  }
+}
