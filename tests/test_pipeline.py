@@ -30,6 +30,7 @@ class FakeRunner:
         r = {
             "trend-scout": {"items": [{"title": "a"}]}, "video-platform-scout": {"items": []},
             "news-scout": {"items": []}, "community-scout": {"questions": []}, "domain-internal-scout": {"items": []},
+            "keyword-miner": {"items": []}, "competitor-gap-analyst": {"items": []},
             "dedup-cluster": {"stories": [{"title": f"Đề tài {i}"} for i in range(8)]},
             "trend-scorer": {"ranked": [{"title": f"Đề tài {i}", "score": 90 - i} for i in range(8)]},
             "content-strategist": {"outline": [{"segment": f"S{i}"} for i in range(1, 4)], "target_minutes": 4.8},

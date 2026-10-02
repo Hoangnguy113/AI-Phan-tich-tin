@@ -1,0 +1,11 @@
+{
+  "language": "vi",
+  "theme": "system",
+  "concurrency": 3,
+  "gemini_provider": "gemini_api",
+  "gemini_model": "gemini-2.5-flash",
+  "gemini_auto_update": true,
+  "gemini_fallback": true,
+  "gemini_tier": "pro",
+  "gemini_refresh_hours": 24
+}

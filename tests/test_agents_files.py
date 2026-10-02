@@ -93,3 +93,13 @@ def test_fact_checker_and_deep_researcher_stay_claude_with_note():
     for stem in ("11-deep-researcher", "12-fact-checker"):
         meta, body = fm[stem]
         assert meta["engine"] == "claude" and "MANG NGUỒN VỀ" in body
+
+
+def test_ngay_dang_bat_buoc_o_agent_04_08_09_va_enrich_bat_mac_dinh():
+    from pathlib import Path
+    from agnet.pipeline.pipeline import Pipeline
+    d = Path(__file__).resolve().parents[1] / ".claude" / "agents"
+    for f in ("04-community-scout", "08-keyword-miner", "09-competitor-gap-analyst"):
+        t = (d / f"{f}.md").read_text(encoding="utf-8")
+        assert "YYYY-MM-DD hoặc null" not in t and "BẮT BUỘC" in t, f
+    assert Pipeline.__dataclass_fields__["enrich_agents"].default == ("keyword-miner", "competitor-gap-analyst")

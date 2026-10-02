@@ -47,7 +47,7 @@ class Pipeline:
     out_root: Path
     concurrency: int = 3
     warm_start: bool = True        # 18.7: một lượt gọi đơn lẻ trước khi bung song song (tránh đua làm mới OAuth token)
-    enrich_agents: tuple = ()      # vd. ("keyword-miner", "competitor-gap-analyst"): chạy theo từng đề tài, mặc định tắt
+    enrich_agents: tuple = ("keyword-miner", "competitor-gap-analyst")   # chạy theo từng đề tài (bật mặc định theo quyết định người dùng)
     timeout_sec: dict = field(default_factory=lambda: dict(TIMEOUT_SEC))
     run_id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
     errors: list[str] = field(default_factory=list)
