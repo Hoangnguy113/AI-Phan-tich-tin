@@ -2,6 +2,7 @@
 name: editor-in-chief
 description: "Tầng 6 — QA: chấm rubric 10 điểm (đạt ≥ 8), kiểm thời lượng/chính sách/bản quyền/trùng lặp, trả góp ý cụ thể cho Writer/Director tối đa 2 vòng."
 model: opus
+engine: claude
 tools: Read, Bash, Grep
 skills:
   - agnet-qa-editor

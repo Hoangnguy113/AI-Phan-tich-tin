@@ -46,3 +46,50 @@ def test_extract_json_variants():
     assert extract_json('lời dẫn {"x": {"y": 2}} đuôi') == {"x": {"y": 2}}
     with pytest.raises(AgentError):
         extract_json("không có json")
+
+
+# ---- engine (v1.2: Gemini khảo sát, Claude phán đoán) ----
+GEMINI_AGENTS = {"trend-scout", "video-platform-scout", "news-scout", "community-scout",
+                 "domain-internal-scout", "keyword-miner", "competitor-gap-analyst"}
+
+
+def _frontmatters():
+    import re
+    out = {}
+    for f in sorted(Path(AGENT_DIR).glob("*.md")):
+        text = f.read_text(encoding="utf-8")
+        m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.S)
+        assert m, f.name
+        out[f.stem] = (yaml.safe_load(m.group(1)), m.group(2))
+    return out
+
+
+def test_all_seventeen_declare_valid_engine_and_name_matches_file():
+    fm = _frontmatters()
+    assert len(fm) == 17
+    for stem, (meta, _) in fm.items():
+        assert meta.get("engine") in {"claude", "gemini"}, stem
+        assert stem.split("-", 1)[1] == meta["name"], stem
+
+
+def test_exactly_seven_gemini_agents():
+    fm = _frontmatters()
+    assert {m["name"] for m, _ in fm.values() if m["engine"] == "gemini"} == GEMINI_AGENTS
+
+
+def test_gemini_prompts_carry_contract_and_forbid_fabrication():
+    for stem, (meta, body) in _frontmatters().items():
+        if meta["engine"] != "gemini":
+            continue
+        low = body.lower()
+        assert "RawItem" in body and "url" in low, stem
+        assert "TaskContract" in body, stem
+        assert "cấm bịa" in low, stem
+        assert "no_search_tool" in body and "trí nhớ" in low, stem
+
+
+def test_fact_checker_and_deep_researcher_stay_claude_with_note():
+    fm = _frontmatters()
+    for stem in ("11-deep-researcher", "12-fact-checker"):
+        meta, body = fm[stem]
+        assert meta["engine"] == "claude" and "MANG NGUỒN VỀ" in body

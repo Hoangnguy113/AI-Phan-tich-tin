@@ -2,6 +2,7 @@
 name: script-writer
 description: "Tầng 5 — viết lời thoại theo từng phân đoạn (1–3 phút) đúng ngân sách từ, giữ mạch bằng bản tóm tắt chạy. Có thể chạy nhiều instance song song cho nhiều kịch bản."
 model: sonnet
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-script-director

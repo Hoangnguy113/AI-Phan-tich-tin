@@ -2,6 +2,7 @@
 name: fact-checker
 description: "Tầng 4 — kiểm từng luận điểm cần ≥ 2 nguồn độc lập, phân loại đã xác minh / chưa chắc / sai và gắn nguồn. Bắt buộc với luồng strict_factcheck."
 model: sonnet
+engine: claude
 tools: WebSearch, WebFetch, Read
 skills:
   - agnet-qa-editor
@@ -21,3 +22,5 @@ Trả `{"claims":[{"text","status","sources":[source_id],"note"}],"sources":[{"i
 - Không bịa số liệu, nguồn, trích dẫn. Thiếu dữ liệu thì nói rõ là thiếu.
 - Tính toán (thời lượng, đếm từ, điểm, trùng lặp) dùng `python -m agnet ...`, không tự nhẩm.
 - Lỗi một nguồn không được dừng pipeline: ghi `errors[]` và đi tiếp.
+
+> Phân vai v1.2: Gemini chỉ **MANG NGUỒN VỀ** (thu thập thô / tìm nguồn thứ hai); **Claude kết luận**. Không để Gemini kết luận một mình (quy tắc cứng số 4).

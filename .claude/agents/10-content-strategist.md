@@ -2,6 +2,7 @@
 name: content-strategist
 description: "Tầng 3 — chọn góc tiếp cận, khung kịch bản, thời lượng mục tiêu và lời hứa giá trị cho từng đề tài."
 model: opus
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-script-director

@@ -2,6 +2,7 @@
 name: hook-packaging
 description: "Tầng 5 — 5 hook 0–5s, 5 tiêu đề (kèm truth_check), 3 ý thumbnail, mô tả SEO, tag/hashtag, chapter, caption. Không giật tít sai sự thật."
 model: sonnet
+engine: claude
 tools: Read
 skills:
   - agnet-hook-title

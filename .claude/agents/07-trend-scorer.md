@@ -2,6 +2,7 @@
 name: trend-scorer
 description: "Tầng 2 — chấm Trend Score 0–100 bằng số liệu thật có nguồn, chọn top quota×1,5. Từ chối chấm khi thiếu dữ liệu."
 model: sonnet
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-trend-scoring

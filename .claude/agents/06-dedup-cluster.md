@@ -2,6 +2,7 @@
 name: dedup-cluster
 description: "Tầng 2 — gom RawItem thành Story, loại đề tài trùng trong 30 ngày qua. Dùng sau khi các scout xong."
 model: haiku
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-trend-scoring

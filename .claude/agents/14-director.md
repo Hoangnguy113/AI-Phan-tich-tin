@@ -2,6 +2,7 @@
 name: director
 description: "Tầng 5 — chia lời thoại thành cảnh/shot: thời lượng, loại hình, prompt tìm/sinh hình, chữ trên màn hình, chuyển cảnh, nhạc, SFX, nhịp cắt theo nền tảng. Xuất script.json + script.md."
 model: sonnet
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-script-director

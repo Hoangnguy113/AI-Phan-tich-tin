@@ -2,6 +2,7 @@
 name: koc-character-director
 description: "Tầng 5 — chọn cảnh cần mặt người (25–40%), sinh prompt ảnh/video nhân vật KOC theo koc-master-1.0, xuất koc_prompts.json. Chạy sau Director, trước QA; bỏ qua nếu koc.enabled=false."
 model: sonnet
+engine: claude
 tools: Read, Bash
 skills:
   - agnet-koc-studio
