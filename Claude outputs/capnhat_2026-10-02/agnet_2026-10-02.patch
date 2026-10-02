@@ -1,0 +1,792 @@
+diff --git a/Claude outputs/PHAN_TICH_UU_TIEN_2026-10-02.md b/Claude outputs/PHAN_TICH_UU_TIEN_2026-10-02.md
+new file mode 100644
+index 0000000..4b92d67
+--- /dev/null
++++ b/Claude outputs/PHAN_TICH_UU_TIEN_2026-10-02.md	
+@@ -0,0 +1,320 @@
++# Phân tích & xếp hạng 10 cốt truyện theo mức ưu tiên
++
++> Ngày phân tích: 02/10/2026 · Đối tượng: `Claude outputs/COT_TRUYEN_2026-10-01.md` (10 cốt truyện, lập 01/10/2026)
++> Mục đích: trả lời "cốt truyện nào nên làm trước, cái nào hút người xem hơn" và chỉ ra chỗ hỏng phải sửa trước khi viết kịch bản.
++
++---
++
++## 0. Đọc cảnh báo này trước
++
++**Đây KHÔNG phải Trend Score.** Theo `.claude/skills/agnet-trend-scoring/SKILL.md` và quy tắc cứng số 1 của dự án, Trend Score chỉ có giá trị khi mọi thành phần dựa trên số liệu thật. Ba thành phần quan trọng nhất của Trend Score — chiếm **55% trọng số** (`velocity` 0,22 + `volume` 0,18 + `engagement` 0,15) — **hiện không có dữ liệu**:
++
++- Chưa có connector số liệu thật (YouTube Data API, Google Trends, RSS) — xem mục "Chưa có" trong `CLAUDE.md`.
++- Tài liệu cốt truyện không chứa view/giờ, % tăng truy vấn, hay tỉ lệ tương tác của video cùng đề tài.
++- Cũng không có bước phân tích đối thủ (competitor-gap) nên `gap` chỉ suy luận được định tính, không đo được.
++
++Vì vậy tôi **không chấm Trend Score và không ước lượng cho đủ**. Nếu đưa 10 đề tài này vào `agnet.core.scoring.rank()`, code sẽ loại sạch cả 10 vì thiếu thành phần — đó là hành vi đúng, không phải lỗi.
++
++Thay vào đó, bảng dưới là **Điểm ưu tiên biên tập**: chấm bằng những gì đọc được và kiểm được từ chính tài liệu (ngày nguồn, chất lượng nguồn, số ô ⚠️ chặn phần lời thoại, chất lượng hook, độ rộng khán giả). Nó trả lời được "nên quay cái nào trước", nhưng **không thay thế** việc đo nhu cầu thật khi đã có connector.
++
++### Thang điểm và trọng số
++
++| Thành phần | Trọng số | Chấm bằng gì |
++|---|---|---|
++| `suc_hut` | 0,20 | Chất lượng hook 0–5s, vòng tò mò mở/đóng, số liệu dễ nhớ và dễ chụp màn hình |
++| `impact` | 0,14 | Hệ quả thật với người xem: tiền, sức khoẻ, nghĩa vụ pháp lý |
++| `reach` | 0,14 | Độ rộng tập khán giả Việt Nam có thể chạm tới |
++| `evergreen` | 0,12 | Còn giá trị sau 30 ngày, có được xem lại/lưu lại |
++| `freshness` | 0,12 | **Tuổi của mốc tin, tính theo ngày ghi trong tài liệu** (đây là dữ kiện kiểm được, không phải velocity) |
++| `source_trust` | 0,10 | Nguồn gốc: văn bản pháp luật / cơ quan nhà nước > báo lớn > trang tổng hợp |
++| `readiness` | 0,11 | Nghịch đảo của số ô ⚠️ **chặn phần lõi** lời thoại |
++| `risk_low` | 0,07 | Nghịch đảo của rủi ro QA / pháp lý / an toàn thân thể |
++
++---
++
++## 1. Kết quả xếp hạng 1 → 10
++
++| Hạng | # | Cốt truyện | Tổng | Hút xem | Sẵn sàng |
++|---:|---:|---|---:|---:|---:|
++| **1** | 1 | Cúm mùa: có nên tự mua thuốc? | **80,0** | 81,2 | 76,8 |
++| **2** | 2 | Ngủ bao nhiêu tiếng là đủ? | **79,9** | 80,6 | 78,3 |
++| **3** | 3 | Lương bao nhiêu thì đóng thuế từ 2026? | **77,1** | 83,4 | 60,9 |
++| **4** | 8 | Video AI phải gắn nhãn từ 2026 | **70,5** | 77,1 | 53,6 |
++| **5** | 7 | AI agent: 5 câu hỏi trước khi bấm "Cho phép" | **68,0** | 70,1 | 62,8 |
++| **6** | 4 | Lãi suất tiết kiệm 4,75% hay 9%? | **67,4** | 72,0 | 55,6 |
++| **7** | 9 | Retinol và vitamin C | **65,7** | 65,9 | 65,1 |
++| **8** | 5 | Bỏ thuế khoán: hộ kinh doanh | **60,0** | 64,0 | 49,8 |
++| **9** | 6 | AI trực điện thoại tiếng Việt | **59,0** | 57,2 | 63,6 |
++| **10** | 10 | Bốn món ăn ngày se khô | **50,2** | 52,3 | 44,6 |
++
++### Bảng thành phần (xếp theo hạng)
++
++| # | suc_hut | impact | reach | evergreen | freshness | source_trust | readiness | risk_low |
++|---:|---:|---:|---:|---:|---:|---:|---:|---:|
++| 1 | 80 | 85 | 90 | 55 | **95** | 85 | 75 | 68 |
++| 2 | 88 | 78 | 88 | 88 | 55 | 80 | **82** | 70 |
++| 3 | 85 | **95** | **95** | 75 | 62 | 88 | *40* | 55 |
++| 8 | 80 | 90 | 62 | 82 | 70 | 85 | *35* | *38* |
++| 7 | 74 | 65 | 55 | 85 | 72 | *38* | 68 | **90** |
++| 4 | **92** | 82 | 60 | *25* | 88 | 78 | *42* | *45* |
++| 9 | 84 | 55 | 72 | **92** | *15* | 62 | 70 | 62 |
++| 5 | 72 | 90 | *48* | 68 | *35* | 70 | *30* | 52 |
++| 6 | 64 | *52* | *35* | 50 | 85 | *45* | 65 | 88 |
++| 10 | 66 | *40* | 68 | 70 | *8* | *42* | 50 | *40* |
++
++(**đậm** = mạnh nhất bảng · *nghiêng* = điểm yếu đáng lo)
++
++---
++
++## 2. Thứ hạng đổi thế nào nếu đổi mục tiêu
++
++Xếp hạng tổng ở trên cân cả "hút xem" và "có làm được ngay không". Nếu chỉ chọn một mục tiêu, thứ tự khác rõ rệt — đây là chỗ bạn nên tự quyết:
++
++| Hạng | Chỉ tối ưu LƯỢNG XEM | Chỉ tối ưu TỐC ĐỘ LÊN SÓNG |
++|---:|---|---|
++| 1 | #3 Thuế TNCN (83,4) | #2 Giấc ngủ (78,3) |
++| 2 | #1 Cúm mùa (81,2) | #1 Cúm mùa (76,8) |
++| 3 | #2 Giấc ngủ (80,6) | #9 Retinol (65,1) |
++| 4 | #8 Nhãn AI (77,1) | #6 AI trực máy (63,6) |
++| 5 | #4 Lãi suất (72,0) | #7 AI agent (62,8) |
++| 6 | #7 AI agent (70,1) | #3 Thuế TNCN (60,9) |
++| 7 | #9 Retinol (65,9) | #4 Lãi suất (55,6) |
++| 8 | #5 Thuế khoán (64,0) | #8 Nhãn AI (53,6) |
++| 9 | #6 AI trực máy (57,2) | #5 Thuế khoán (49,8) |
++| 10 | #10 Món ăn (52,3) | #10 Món ăn (44,6) |
++
++**Điều cần nhớ**: hai đề tài hút xem nhất (#3 thuế, #8 nhãn AI) lại **nằm cuối bảng sẵn sàng**. Đó không phải trùng hợp — chúng hút xem vì chạm vào tiền và nghĩa vụ pháp lý, và chính vì thế mà sai một con số là hậu quả thật. Đừng đảo thứ tự để chạy theo lượt xem mà bỏ bước xác minh.
++
++---
++
++## 3. Phân tích từng cốt truyện
++
++### Hạng 1 — #1 Cúm mùa: có nên tự mua thuốc? (80,0)
++
++**Vì sao đứng đầu**: đây là đề tài duy nhất có mốc tin **cách ngày lập tài liệu đúng 1 ngày** (Cục Phòng bệnh, 01/10/2026) — `freshness` 95, cao nhất bảng. Cộng thêm `reach` 90 (mùa cúm, nhà nào cũng có người ho) và nguồn là Bộ Y tế qua Nhân Dân / Báo Tin tức.
++
++**Tài sản mạnh nhất**: động lực chia sẻ tự nhiên. CTA "gửi cho người thân trên 65 tuổi hoặc đang mang thai" không phải lời kêu gọi suông — 5 nhóm nguy cơ có nguồn chính là 5 lý do để người xem gửi video cho người cụ thể trong nhà. Đây là cơ chế lan truyền tốt nhất trong cả 10 cốt truyện.
++
++**Chỗ phải sửa**: phân đoạn 1:30–3:30 "Cúm hay cảm lạnh?" là 320 từ (**20% lời thoại**) và đang treo ⚠️ chờ nguồn Bộ Y tế. Đây là ô trống dễ bịt nhất trong cả bộ — một trang hướng dẫn của Bộ Y tế là xong. Làm việc này trước.
++
++**Điểm yếu cố hữu**: `evergreen` chỉ 55. Câu "tăng nhẹ" chỉ đúng tới ngày nguồn đăng. Video này **có hạn sử dụng tính theo tuần** — nếu không quay trong 1–2 tuần, phải cập nhật lại số liệu hoặc bỏ.
++
++---
++
++### Hạng 2 — #2 Ngủ bao nhiêu tiếng là đủ? (79,9)
++
++**Vì sao sát hạng 1**: điểm tổng gần như bằng #1 nhưng vì lý do ngược lại. #1 thắng bằng độ nóng, #2 thắng bằng **cấu trúc**: `evergreen` 88 và `readiness` 82 — cao nhất bảng về mức sẵn sàng.
++
++**Tài sản mạnh nhất**: hook có xung đột số học thật — "một chuyên gia nói 6–7 tiếng, một nghiên cứu 9.641 người nói 7–8 tiếng, ai đúng?" Và câu trả lời không phải mẹo rẻ: hai con số nói về **tối thiểu** và **tối ưu**, hai thứ khác nhau. Vòng tò mò mở ở 0:30, đóng ở 7:15 — đóng đúng chỗ, không đóng quá sớm. Bộ số 9.641 người / 15,5 năm / 27% / 28% rất dễ nhớ và dễ chụp màn hình.
++
++**Chỗ phải sửa**: hai việc rẻ. (a) Ngày đăng bài Thanh Niên hiện **chỉ suy ra từ đường dẫn** (có vẻ 23/08/2025) — nếu đúng thì bài đã hơn một năm, **cấm nói "mới công bố"**. (b) Lấy liên kết gốc Scientific Reports để xác nhận đây là nghiên cứu quan sát.
++
++**Bẫy QA nghiêm trọng**: tiêu đề số 2 ("Ngủ nhiều hơn 8 tiếng cũng có thể là dấu hiệu xấu?") đang treo ⚠️ vì nghiên cứu là quan sát. Dùng tiêu đề số 1. Và trong lời thoại, "liên quan" không bao giờ được đổi thành "gây ra" — đây là lỗi nặng theo rubric QA, trượt thẳng.
++
++---
++
++### Hạng 3 — #3 Lương bao nhiêu thì đóng thuế từ 2026? (77,1)
++
++**Đề tài hút xem nhất cả bộ** (`Hút xem` 83,4): `impact` 95 và `reach` 95 — cao nhất cả hai cột. Mọi người đi làm ăn lương đều liên quan. Nguồn là Nghị quyết 110/2025/UBTVQH15 và Luật TNCN 2025 — `source_trust` 88.
++
++**Tài sản mạnh nhất**: video này sửa **đúng một hiểu lầm phổ biến nhất** — 15,5 triệu là mức *giảm trừ*, không phải *ngưỡng lương*. Phần lớn báo chí chỉ in lại con số; gần như không ai giải thích chênh lệch này bằng ví dụ tính từng bước. Đó là khoảng trống thật. Ba ví dụ tính (20 triệu → 225.000đ; 25 triệu → 475.000đ; 25 triệu + 1 người phụ thuộc → 165.000đ) là nội dung người xem sẽ lưu lại.
++
++**Vì sao không đứng hạng 1 dù hút xem nhất**: `readiness` 40. Hai lỗ hổng chặn ngang:
++
++1. **Mốc các bậc 10% / 20% / 30% chưa kiểm.** Tài liệu ghi thẳng "Để trống tới khi xác minh". Phân đoạn 3:30–5:30 (320 từ) là bảng thuế 5 bậc — **không thể viết khi còn trống 3 trong 5 bậc**.
++2. **Ngày áp dụng chưa rõ: 01/01/2026 hay 01/07/2026.** Đây không phải chi tiết phụ — nó là **tiền đề của tiêu đề** ("từ 2026"). Luật có hiệu lực 01/07/2026 nhưng mức giảm trừ và biểu 5 bậc áp dụng từ kỳ tính thuế 2026. Nói sai mốc này là nói sai toàn bộ video.
++
++**Việc cần làm**: đọc văn bản gốc Nghị quyết 110/2025/UBTVQH15 và Luật TNCN 2025 trên cổng văn bản chính thức. Khi hai lỗ này bịt xong, #3 sẽ **vượt lên hạng 1**.
++
++---
++
++### Hạng 4 — #8 Video AI phải gắn nhãn từ 2026 (70,5)
++
++**Giá trị chiến lược cao nhất cả bộ, không phải vì lượt xem.** Đề tài này điều chỉnh **chính sản phẩm Agnet**: nhân vật KOC là người AI, nên mỗi video dùng KOC đều rơi vào diện gắn nhãn. Nghiên cứu cho video này **đồng thời là nghiên cứu pháp lý cho dự án của bạn** — một công đôi việc. Tài liệu cốt truyện đã đặt cảnh báo này ở đầu file, và đúng.
++
++**Tài sản mạnh nhất**: `impact` 90 + `evergreen` 82. Luật có hiệu lực nhiều năm, nên đây là video tham chiếu — loại được dẫn lại, được lưu, được gửi cho nhau trong giới làm nội dung. 15 phút ở đây là **chính đáng** (4 phần rõ + 4 tình huống áp dụng), khác với #4 nơi 15 phút là rủi ro.
++
++**Vì sao chỉ hạng 4**: `readiness` 35 và `risk_low` 38 — **đôi điểm thấp nhất cả bộ về mặt làm được**.
++
++- **Ngày hiệu lực Nghị định 142/2026 không đọc được**: tài liệu ghi nguồn chỉ trích được chuỗi "1-5", không rõ năm. Thế mà tiêu đề số 2 lại hứa "4 cách làm hợp lệ theo Nghị định 142/2026" — **hứa theo một văn bản mà bạn chưa biết nó có hiệu lực khi nào**.
++- **Mức xử phạt cụ thể: nguồn không nêu.**
++- **Ngưỡng "chỉnh sửa nhỏ" cần luật sư**, và tài liệu khuyến nghị luật sư đọc trước khi đăng.
++
++**Hậu quả nếu sai**: người làm nội dung hành động theo video của bạn và bị xử phạt. Đây là con đường gây hại trực tiếp nhất về mặt pháp lý trong cả 10 đề tài. Ngược lại, đây cũng là đề tài mà khâu `human_review` bắt buộc của dự án **thật sự đáng tiền**.
++
++**Việc cần làm**: đọc toàn văn Luật Trí tuệ nhân tạo 2025 và Nghị định 142/2026/NĐ-CP trên cổng văn bản chính thức, rồi mới viết. Đừng viết từ bản tóm tắt báo chí.
++
++---
++
++### Hạng 5 — #7 AI agent: 5 câu hỏi trước khi bấm "Cho phép" (68,0)
++
++**Vì sao vào top 5 dù nguồn yếu nhất**: `evergreen` 85 và `risk_low` 90. Khung "5 câu hỏi trước khi cấp quyền" là tài sản bền — nó còn dùng được khi Muse, Jev và mọi cái tên trong bản tin đã bị lãng quên. Và vì không nhạy cảm, nó **không cần `human_review`** — đường ra sóng rẻ và nhanh nhất trong nhóm có `evergreen` cao.
++
++**Khuyết điểm nặng nhất: `source_trust` 38, thấp nhất cả bộ.** Mốc tin (Meta Muse lên macOS) đến từ `aiagentsdirectory` — một trang **tổng hợp**, **một nguồn duy nhất**, và bản tin cùng loạt ngày 27/09 **trả về 404**. Thông báo chính thức của Meta chưa đọc. Trong cùng bản tin còn có tin đồn về Anthropic mà tài liệu đã đúng khi gạch bỏ.
++
++**Nhưng đây là khuyết điểm sửa được bằng cách đổi khung**: 5 câu hỏi là khung của biên tập, **không phụ thuộc vào Muse**. Nếu không xác minh được Muse, thay mốc tin bằng bất kỳ bản phát hành AI agent nào có thông báo chính thức — giá trị video còn nguyên. Đó là lý do nó xếp trên #4 dù nguồn kém hơn nhiều.
++
++**Rủi ro dựng phim cần nói rõ**: phân đoạn 5:00–9:30 là **720 từ / 4,5 phút / 37% video** cho một danh sách 5 mục, mỗi mục ~54 giây. Đây là khối đơn điệu dài nhất trong cả 10 cốt truyện. Director phải có 5 cách hình hoá khác nhau, không thì tụt giữ chân ở phút 6–8.
++
++---
++
++### Hạng 6 — #4 Lãi suất tiết kiệm 4,75% hay 9%? (67,4)
++
++**Hook mạnh nhất cả bộ**: `suc_hut` 92. "Cùng một ngân hàng, một chỗ 4,75%, một chỗ trên 9%. Đây không phải lỗi gõ máy." Cộng với con số tiền thật — 500 triệu gửi 3 tháng chênh 4.312.500đ — và chi tiết có vị "nội bộ" nhưng **có nguồn thật**: phần lớn mức 9% áp dụng qua mã giới thiệu nhân viên, **không niêm yết công khai** (VnExpress 23/09/2026). Đó là thứ làm người ta bấm vào.
++
++**Nhưng đây là cốt truyện có lỗi cấu trúc nghiêm trọng nhất cả bộ:**
++
++> **Vòng tò mò của video có payoff chưa được xác minh.**
++>
++> Tài liệu mở vòng ở 0:40 — "có một câu hỏi ngân hàng ít khi chủ động nói, tôi để cuối video" — và đóng ở 12:00–14:00 bằng "sản phẩm này có được bảo hiểm tiền gửi không". Nhưng mục "Cần xác minh" lại ghi: *"Chứng chỉ tiền gửi có thuộc diện bảo hiểm tiền gửi không"* — **chưa biết**.
++>
++> Nghĩa là: bạn hứa một câu trả lời ở phút 0:40, và ở phút 12 bạn vẫn chưa có câu trả lời đó. Nếu viết kịch bản bây giờ, hoặc phải trả lời mơ hồ (vỡ lời hứa, trượt QA), hoặc phải đổi payoff (phải viết lại cả vòng mở).
++
++**Các điểm yếu khác**:
++- `evergreen` 25, **thấp nhất cả bộ**. Bảng lãi suất chết trong vài tuần. Tài liệu tự ghi "lãi suất đổi nhanh".
++- **Kỳ hạn gắn với các mức 9% chưa trích được** — nên không được nói "gửi 12 tháng được 9%". Mà kỳ hạn chính là thông tin người xem cần nhất.
++- `risk_low` 45: nêu tên 9+ ngân hàng kèm con số, trong một video về tiền. Lệnh cấm "không nói ngân hàng X an toàn / không an toàn" phải được giữ tuyệt đối.
++- 15 phút cho một đề tài bảng số là dài. Cân nhắc cắt xuống 10–12 phút.
++
++**Kết luận về #4**: hook tốt nhất, nền móng yếu nhất. **Đừng viết cho tới khi trả lời được câu bảo hiểm tiền gửi** (nguồn: Bảo hiểm tiền gửi Việt Nam hoặc NHNN). Và vì số liệu rữa nhanh, đề tài này chỉ nên làm khi pipeline đã chạy được end-to-end trong vài ngày — hiện tại chưa chứng minh được điều đó (lần chạy thật 01/10 bỏ dở).
++
++---
++
++### Hạng 7 — #9 Retinol và vitamin C (65,7)
++
++**Hai mặt đối lập rõ nhất cả bộ**: `evergreen` 92 (cao nhất) nhưng `freshness` 15 (gần thấp nhất). Nguồn Vinmec cập nhật **22/07/2024 — hơn 2 năm**. Tài liệu tự thừa nhận: "không phải xu hướng 2026". Trên thang *xu hướng*, đây là đề tài yếu nhất nhóm trên. Trên thang *thư viện nội dung*, nó thuộc nhóm mạnh nhất.
++
++**Tài sản mạnh nhất**: hook cụ thể và dễ nhớ bất thường — "một con số pH giải thích vì sao hai hoạt chất này cần cách nhau 20 phút". pH 2,5–3,5 so với 5,5–6, và mốc "20 phút" là thứ người xem chụp màn hình và lưu lại. Thêm nữa đây là **phá bỏ định kiến có nguồn bệnh viện**: "nghe nói retinol và vitamin C kỵ nhau — một bệnh viện nói điều ngược lại". Phá định kiến + dẫn nguồn uy tín là công thức tương tác ổn định.
++
++**Lợi thế vận hành lớn nhất cả bộ**: 6 phút, TikTok/YouTube. **Rẻ nhất, nhanh nhất, dễ cắt Shorts nhất.** Nếu mục tiêu là có một video hoàn chỉnh ra lò sớm để kiểm chứng pipeline, đây là ứng viên tốt nhất về mặt chi phí.
++
++**Nhưng lệch cấu hình luồng** (xem mục 4): 6 phút **nằm ngoài** `duration_mix {8-12: 1}` của luồng duy nhất đang bật; TikTok không khớp `platform: youtube`; KOC-01 Mai và khán giả làm đẹp không khớp `audience: "Người 30–55 tuổi quan tâm phòng bệnh"`. Muốn làm #9 thì **phải tạo luồng mới**, không chạy ghép được.
++
++**Chỗ phải sửa**: nguồn đơn lẻ (chỉ Vinmec). Ba việc cần nguồn da liễu: nồng độ và thời gian làm quen; retinol và thai kỳ; người da nhạy cảm. Đáng chú ý — **lời khuyên ở phân đoạn kết (5:15–6:00) hiện chưa có nguồn**, tài liệu ghi rõ "chưa có nguồn trong đợt này". Kết video bằng một khuyến nghị y tế không nguồn là chỗ QA sẽ chặn.
++
++---
++
++### Hạng 8 — #5 Bỏ thuế khoán: hộ kinh doanh (60,0)
++
++**Nghịch lý của cốt truyện này**: `impact` 90 — ngang #8, cao hơn #1 và #2. Với hộ kinh doanh, đây không phải nội dung "hay biết" mà là **nghĩa vụ bắt buộc**: hoá đơn điện tử từ 1 tỷ, sổ sách từ 500 triệu, tài khoản ngân hàng riêng, khai theo quý từ 30/04/2026. Động lực xem cực mạnh. Thiết bị tương tác "bạn thuộc nhóm nào trong 4 nhóm doanh thu?" là một trong những cách giữ chân tốt nhất cả bộ.
++
++**Vậy vì sao chỉ hạng 8?** Vì **toàn bộ nền tảng dữ kiện đã cũ, và cũ theo cách tệ nhất**:
++
++> Nguồn chính là VietNamNet **18/12/2025** — viết **trước** mốc 01/01/2026, về một đợt chuyển đổi mà **nay đã diễn ra xong 9 tháng**. Tức là bạn đang chuẩn bị làm video hướng dẫn "cần làm gì để chuẩn bị" cho một việc đã xảy ra.
++
++Thêm vào đó: tỷ lệ tính thuế theo ngành chưa kiểm; trạng thái hướng dẫn hiện hành chưa kiểm; và bài Tuổi Trẻ 28/12/2025 "Chậm hướng dẫn, hộ kinh doanh lo lắng với ngưỡng tính thuế" **chỉ thấy tiêu đề trong kết quả tìm kiếm, chưa mở đọc**. `readiness` 30 — thấp nhất cả bộ, và `freshness` 35.
++
++`reach` 48 cũng là hạn chế thật: hộ kinh doanh hẹp hơn người đi làm ăn lương (#3) nhiều.
++
++**Việc cần làm**: đây là đề tài **phải nghiên cứu lại gần như từ đầu**, không phải bịt vài lỗ. Trạng thái pháp lý hiện hành tháng 10/2026 mới là nội dung; bài tháng 12/2025 chỉ còn là bối cảnh. Nếu nghiên cứu lại tử tế, góc hay nhất bây giờ không còn là "chuẩn bị gì" mà là **"9 tháng rồi, hộ kinh doanh vướng ở đâu"** — và đó là một cốt truyện khác, mạnh hơn.
++
++**Gợi ý giữ nguyên từ tài liệu**: ghép #3 + #5 thành "Thuế 2026 cho người đi làm và hộ kinh doanh" (~16–17 phút). Hợp lý, vì #3 gánh được phần `reach` mà #5 thiếu.
++
++---
++
++### Hạng 9 — #6 AI trực điện thoại tiếng Việt (59,0)
++
++**Điểm mạnh thật**: `freshness` 85 (Webie 29/09/2026) và `risk_low` 88 (không nhạy cảm, không cần duyệt tay). Và một lợi thế hiếm: **khoảng trống nội dung rõ ràng** — tiếng Việt vừa mới được thêm vào nền tảng năm 2026, nên gần như chưa có nội dung Việt về chủ đề này. Lợi thế người đi trước là thật.
++
++**Nhưng ba điểm yếu cộng dồn**:
++
++1. **`reach` 35 — thấp nhất cả bộ.** Khán giả là chủ tiệm nhỏ có lượng gọi đến đủ nhiều để cần tự động hoá. Đây là tập hẹp, và là tập khó chạm nhất bằng YouTube phổ thông ở Việt Nam.
++2. **`source_trust` 45.** Một bài duy nhất trên một trang gần giới nhà cung cấp, và **mọi con số nổi bật đều do nhà cung cấp tự báo**: 35%, 30%, 50%, 9–30%, 69%. Tài liệu xử lý đúng — dành hẳn phân đoạn 3:30–5:00 (240 từ) để nói "đây là số theo bài, không kiểm độc lập". Nhưng hãy thấy ý nghĩa của việc đó: **bạn dùng 240 từ của video để hạ giá trị bằng chứng của chính mình**. Về biên tập thì liêm chính; về nền móng thì yếu.
++3. Con số thị trường 2,4 tỷ → 47,5 tỷ USD (2034) là **dự báo** — hầu như không mang thông tin.
++
++**Giá trị còn lại**: khung "thử 1 tuần, 5 bước" là của biên tập và là phần dùng được lâu. Nếu làm, hãy xem đây là **video kỹ năng vận hành cho chủ tiệm nhỏ**, đừng xem là bản tin công nghệ.
++
++**Gợi ý từ tài liệu**: ghép #6 + #7 thành "AI vào đời sống: tiệm nhỏ và máy cá nhân" (~18–19 phút). Hợp lý — #7 bù `reach` và `evergreen` cho #6, #6 bù `freshness` cho #7. Ghép lại thì cặp này mạnh hơn hẳn từng cái riêng.
++
++---
++
++### Hạng 10 — #10 Bốn món ăn ngày se khô (50,2)
++
++**Đây là cốt truyện tôi khuyên hoãn, và lý do không phải vì nó dở.**
++
++Khung biên tập thật ra **dũng cảm và đúng tinh thần dự án**: lấy 4 món Đông y rồi phân loại thành ba nhóm — "nguồn nêu theo Đông y", "khoa học chưa rõ", "cần thận trọng". Tài liệu còn ghi thẳng: nếu không tìm được bằng chứng khoa học thì **nói "chưa có bằng chứng", đó cũng là nội dung**. Đó là thái độ đúng.
++
++**Nhưng có bốn vấn đề, và vấn đề thứ nhất là vấn đề cấu trúc:**
++
++1. **Lời hứa của video có thể không trả lời được.** Tiêu đề hỏi "cái gì có cơ sở?" nhưng nguồn CDC Quảng Ninh chỉ mô tả công dụng theo Đông y, **không có bằng chứng lâm sàng**. Khả năng cao kết luận sẽ là "cả bốn món đều chưa có bằng chứng". Trung thực, nhưng là một đường cong giữ chân đi xuống: người xem ở lại 8 phút để nghe "không có gì được chứng minh". Rubric QA sẽ phải trả lời câu "video có giữ đúng lời hứa không".
++2. **`freshness` 8 — thấp nhất cả bộ.** Nguồn đăng **03/11/2022**, bốn năm trước. Không có mốc tin nào.
++3. **An toàn thân thể: ba điểm chưa có nguồn, và đều là điểm thật.** Tài liệu tự liệt kê: *xuyên bối mẫu là vị thuốc cần thầy thuốc kê*; *loại hạnh nhân dùng là gì (ngọt hay đắng)*; *người đái tháo đường và đường phèn*. Đây là video dạy nấu một món **có vị thuốc trong công thức**, phát cho khán giả Facebook, mà cả ba lưu ý an toàn đều đang trống. Đó là con đường gây hại thân thể trực tiếp nhất trong cả 10 đề tài — `risk_low` 40.
++4. `impact` 40 — thấp nhất. Món ăn dễ chịu ngày se khô, không phải việc hệ quả lớn.
++
++**Điểm mạnh không nên bỏ qua**: nền tảng Facebook + nội dung ẩm thực truyền thống là tổ hợp có tỉ lệ chia sẻ cao ở Việt Nam, và `evergreen` 70 theo mùa (thu đông, lặp lại hằng năm). Nếu bịt được ba lỗ an toàn và tìm được nguồn y khoa, đây là một video theo mùa tốt — **cho mùa sau**, không phải bây giờ.
++
++---
++
++## 4. Những phát hiện phải xử lý trước khi viết bất cứ kịch bản nào
++
++### 4.1 Chỉ có 1 luồng đang cấu hình — 6 trong 10 cốt truyện không có luồng để chạy
++
++`config/flows.yaml` hiện chỉ có **một** luồng: `suckhoe-yt-sang` (sức khoẻ · YouTube · `audience: "Người 30–55 tuổi tại Việt Nam, quan tâm phòng bệnh"` · `duration_mix {8-12: 1}` · `daily_quota: 1` · `sensitive: true`).
++
++| Cốt truyện | Khớp luồng hiện có? |
++|---|---|
++| #1 (10 phút, sức khoẻ, YouTube) | ✅ khớp hoàn toàn |
++| #2 (12 phút, sức khoẻ, YouTube) | ✅ khớp hoàn toàn |
++| #10 (8 phút, Đông y/ẩm thực, Facebook) | ⚠️ thời lượng khớp, nền tảng và chủ đề lệch |
++| #9 (6 phút, làm đẹp, TikTok) | ❌ **6 phút nằm ngoài `duration_mix {8-12}`**, nền tảng và khán giả lệch |
++| #3 #5 (tài chính/thuế) | ❌ chưa có luồng tài chính |
++| #6 #7 (công nghệ AI) | ❌ chưa có luồng công nghệ |
++| #4 #8 (15 phút) | ❌ **15 phút nằm trong bucket `15-20` đang đặt quota 0** |
++
++**Hệ quả thực tế**: ngay bây giờ, chỉ #1 và #2 chạy được qua pipeline mà không sửa cấu hình. Mọi cốt truyện khác cần tạo luồng mới (tài chính, công nghệ, làm đẹp) hoặc mở bucket thời lượng. Đây là việc cấu hình, không phải việc viết.
++
++### 4.2 Đã kiểm bằng code — hai điểm này tốt
++
++Tôi đã chạy kiểm chứng bằng code, không bằng mắt:
++
++- **Toán thời lượng/số từ: cả 10 cốt truyện đều đúng.** Tổng số từ các phân đoạn khớp `phút × 160 wpm`, lệch tối đa 1 từ do làm tròn. Đối chiếu với `agnet.core.timing.word_budget()`: 6 phút→960, 8→1280, 9→1440, 10→1600, 12→1920, 15→2400 — khớp hết. Tài liệu đã tính đúng ngân sách từ.
++- **Chống trùng 30 ngày: cả 10 tiêu đề đều sạch.** `python -m agnet dedup` trả `{"duplicate": false}` cho cả 10. Không có đề tài nào đụng kho 30 ngày.
++
++### 4.3 Bốn lỗi cấu trúc phải sửa, theo mức nặng
++
++1. **#4 — vòng tò mò có payoff chưa xác minh** (bảo hiểm tiền gửi). Nặng nhất, vì nó làm hỏng xương sống kịch bản, không chỉ một ô dữ liệu. Sửa trước khi viết.
++2. **#3 — tiền đề tiêu đề chưa chốt** (01/01 hay 01/07/2026) **và 3/5 bậc thuế còn trống**. Một đề tài hút xem nhất bộ mà không viết được phân đoạn lõi.
++3. **#8 — hứa theo một nghị định chưa biết ngày hiệu lực.** Tiêu đề số 2 nói "4 cách hợp lệ theo Nghị định 142/2026" trong khi nguồn chỉ trích được "1-5", không rõ năm.
++4. **#5 — nền dữ kiện cũ 9 tháng và viết trước đợt chuyển đổi.** Cần nghiên cứu lại, không phải bịt lỗ.
++
++### 4.4 Ba cốt truyện không có mốc tin nào
++
++#9 (nguồn 22/07/2024), #10 (03/11/2022), và một phần #2 (nghiên cứu ~23/08/2025). Ba cái này **không được quảng bá như tin mới**. Chúng là nội dung thư viện — giá trị thật, nhưng phải định vị đúng, nếu không thì tiêu đề sẽ vi phạm `truth_check`.
++
++### 4.5 Nhân vật KOC chưa dùng được cho luồng thật
++
++Tài liệu gán KOC-01…KOC-05 cho 10 cốt truyện. Nhưng theo `CLAUDE.md`: nhân vật KOC mới có **chữ** (`status: draft`), **chưa có ảnh gốc / bảng 9 ảnh**, nên **chưa được bật cho luồng thật**. Nghĩa là các gán nhân vật trong tài liệu hiện là dự kiến, chưa thi hành được. Cộng thêm #8: mỗi video dùng KOC cần nhãn nội dung AI rõ ràng.
++
++---
++
++## 5. Khuyến nghị: thứ tự làm thật
++
++Tôi khuyên **không** làm theo đúng thứ tự xếp hạng, vì xếp hạng là thước đo giá trị, còn thứ tự sản xuất phải tính cả việc "cái nào đang chặn cái nào". Thứ tự tôi khuyên:
++
++**Bước 0 — trước mọi việc viết: #8, nhưng làm phần nghiên cứu pháp lý trước, chưa quay.**
++Đọc toàn văn Luật Trí tuệ nhân tạo 2025 và Nghị định 142/2026/NĐ-CP. Lý do không phải vì #8 hạng 4, mà vì **nó quyết định cách bạn được phép làm 9 video còn lại** — mọi video dùng KOC đều cần nhãn AI. Nghiên cứu này là điều kiện tiên quyết của cả kho, và nó cũng chính là nội dung của #8. Nhờ luật sư xác nhận.
++
++**Bước 1 — quay trước: #1 Cúm mùa.**
++Hạng 1, khớp hoàn toàn luồng duy nhất đang bật, và **có hạn sử dụng tính theo tuần**. Chỉ cần bịt một lỗ (bảng phân biệt cúm/cảm lạnh từ nguồn Bộ Y tế). Để chậm là mất.
++
++**Bước 2 — quay ngay sau: #2 Giấc ngủ.**
++Hạng 2, `readiness` cao nhất, khớp luồng, không có hạn sử dụng. Đây là video nên dùng để **đo thật chất lượng viết và QA của pipeline** (hiện chưa có lần chạy thật nào hoàn tất) — vì nó không gấp, nên nếu agent chạy chậm hay treo, bạn không mất cơ hội nội dung nào.
++
++**Bước 3 — song song, không quay: mở ba việc xác minh.**
++(a) #3: mốc bậc thuế + ngày áp dụng. (b) #4: bảo hiểm tiền gửi + kỳ hạn các mức 9%. (c) #5: trạng thái pháp lý hộ kinh doanh tháng 10/2026. Khi (a) xong, **#3 lên hạng 1 và nên quay ngay** — nó là đề tài hút xem nhất cả bộ.
++
++**Bước 4 — #7, hoặc ghép #6+#7.**
++Không nhạy cảm nên không cần duyệt tay; `evergreen` cao. Đổi mốc tin sang một nguồn chính thức thay cho bản tin tổng hợp. Nếu ghép với #6 thành 18–19 phút thì mạnh hơn từng cái.
++
++**Bước 5 — #9 nếu muốn một video rẻ ra lò nhanh.**
++6 phút, dễ cắt Shorts, `evergreen` cao nhất. Nhưng phải tạo luồng làm đẹp riêng (TikTok, 6 phút không khớp luồng hiện có) và bổ sung nguồn da liễu cho phần kết.
++
++**Hoãn: #10.** Chờ bịt ba lỗ an toàn (xuyên bối mẫu, loại hạnh nhân, đường phèn với người đái tháo đường) và tìm nguồn y khoa. Là video theo mùa — làm cho mùa thu đông sau cũng không mất gì.
++
++---
++
++## 6. Cách dùng lại phân tích này
++
++Trọng số ở mục 0 là lựa chọn biên tập, không phải chân lý. Nếu bạn ưu tiên khác — ví dụ coi `freshness` quan trọng hơn `evergreen`, hoặc bỏ hẳn `readiness` vì bạn sẵn sàng đầu tư xác minh — thứ hạng sẽ đổi. Mục 2 đã cho thấy hai cực của việc đổi trọng số.
++
++Và nhắc lại điều quan trọng nhất: **khi đã có connector số liệu thật (YouTube Data API, Google Trends), hãy chấm lại bằng Trend Score thật.** Bảng này tốt nhất trong điều kiện không có số liệu nhu cầu — nhưng nó vẫn chỉ là phán đoán biên tập về *mức độ hấp dẫn*, không phải *đo lường nhu cầu*. Ba thành phần nặng nhất của Trend Score (55% trọng số) vẫn đang thiếu.
+diff --git a/Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md b/Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md
+new file mode 100644
+index 0000000..71f72f5
+--- /dev/null
++++ b/Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md	
+@@ -0,0 +1,222 @@
++# Quyết định sản xuất — chốt, không bàn thêm
++
++> Ngày: 02/10/2026 · Người quyết: Claude (bạn giao quyền quyết định) · Tiền đề: `PHAN_TICH_UU_TIEN_2026-10-02.md`
++> Việc đã làm trong phiên này: **đi xác minh thật** các ô ⚠️ chặn nặng nhất, chấm lại, rồi sửa `config/flows.yaml` cho kế hoạch chạy được.
++
++---
++
++## 1. Quyết định một dòng
++
++> **Quay #1 (cúm mùa) trước — ngay tuần này. Rồi #3 (thuế TNCN). Rồi #2 (giấc ngủ). Rồi #8 (nhãn AI). Hoãn #5 và #10.**
++
++Lý do #1 đi trước dù không còn là hạng 1: **nó là cốt truyện duy nhất có đồng hồ đếm ngược.** Mọi cái khác chờ được; cái này thì không.
++
++---
++
++## 2. Thứ hạng đã đổi, vì tôi đã gỡ được các ô chặn
++
++Tôi không chỉ xếp hạng lại trên giấy — tôi đi tìm các dữ kiện còn thiếu. Kết quả:
++
++| Hạng mới | Hạng cũ | # | Cốt truyện | Tổng | Đổi | Sẵn sàng |
++|---:|---:|---:|---|---:|---:|---:|
++| **1** | 3 | **3** | Lương bao nhiêu thì đóng thuế 2026? | **81,7** | +4,6 | 77,4 (từ 60,9) |
++| **2** | 1 | **1** | Cúm mùa: tự mua thuốc? | **81,1** | +1,1 | 80,8 |
++| **3** | 2 | 2 | Ngủ bao nhiêu tiếng là đủ? | 79,9 | — | 78,3 |
++| **4** | 4 | **8** | Video AI phải gắn nhãn | **76,1** | +5,6 | 73,5 (từ 53,6) |
++| **5** | 6 | **4** | Lãi suất 4,75% hay 9%? | **71,6** | +4,2 | 68,4 (từ 55,6) |
++| 6 | 5 | 7 | AI agent: 5 câu hỏi | 68,0 | — | 62,8 |
++| 7 | 7 | 9 | Retinol và vitamin C | 65,7 | — | 65,1 |
++| 8 | 8 | 5 | Bỏ thuế khoán | 60,0 | — | 49,8 |
++| 9 | 9 | 6 | AI trực điện thoại | 59,0 | — | 63,6 |
++| 10 | 10 | 10 | Bốn món ăn se khô | 50,2 | — | 44,6 |
++
++**#3 lên hạng 1 đúng như dự báo** ở báo cáo trước ("khi hai lỗ này bịt xong, #3 sẽ vượt lên hạng 1"). Bốn cốt truyện tăng điểm, không phải vì tôi đổi ý — mà vì nền dữ kiện của chúng đã khác.
++
++Chạy lại: `python scripts/rank_cot_truyen.py` · xem thứ hạng cũ: đặt `APPLY_SAU_XAC_MINH = False`.
++
++---
++
++## 3. Hồ sơ xác minh — những gì tôi gỡ được hôm nay
++
++### 3.1 #8 Nhãn AI — gỡ 3 trong 4 ô chặn. Đây là phát hiện quan trọng nhất phiên này.
++
++**Chuỗi "1-5" mà tài liệu không đọc được chính là ngày 01/5/2026.**
++
++| Ô chặn cũ | Trạng thái | Dữ kiện |
++|---|---|---|
++| Ngày hiệu lực Nghị định 142/2026 | ✅ **GỠ** | Ban hành **30/04/2026**, hiệu lực **01/05/2026** |
++| Mức xử phạt cụ thể | ✅ **GỠ** (kèm một khúc mắc quan trọng — xem dưới) | Cá nhân tới **1 tỷ đồng**; tổ chức tới **2 tỷ đồng**; trường hợp nghiêm trọng tới **2% doanh thu năm trước**; có thể bị **truy cứu trách nhiệm hình sự** |
++| Phạm vi bắt buộc gắn nhãn | ✅ **GỠ, và hẹp hơn tài liệu tưởng** | **Điều 11 khoản 4** Luật AI: chỉ **hai** trường hợp — (1) mô phỏng/giả lập **ngoại hình, giọng nói của người thật**; (2) **tái hiện sự kiện thực tế** |
++| Ngưỡng "chỉnh sửa nhỏ" | ❌ **CÒN MỞ** — cần luật sư | — |
++
++**Bổ sung, không có trong tài liệu gốc — và rất quan trọng với bạn:**
++
++- **Luật AI 2025 = Luật số 134/2025/QH15**, thông qua 10/12/2025, hiệu lực 01/03/2026, gồm **8 chương 35 điều**.
++- **Có lộ trình ân hạn**: bên cung cấp AI có **1 năm để tuân thủ đầy đủ, tới 01/03/2027**; riêng hệ thống AI dùng trong **y tế, giáo dục, tài chính được gia hạn tới 01/09/2027**.
++- **Khúc mắc về mức phạt phải nói đúng trong video**: Luật đặt **trần** phạt, nhưng **chưa có nghị định xử phạt chuyên biệt cho riêng hành vi không gắn nhãn nội dung AI** — các nghị định xử phạt hiện hành về an ninh mạng, dữ liệu không quy định riêng hành vi này. Nói "không gắn nhãn phạt 1 tỷ" là **sai**; phải nói "Luật đặt trần tới 1 tỷ với cá nhân, nhưng chưa có nghị định xử phạt riêng cho hành vi này".
++
++> #### Điều này thay đổi câu hỏi pháp lý của chính dự án Agnet
++>
++> Hai trường hợp bắt buộc đều nói về **người thật** và **sự kiện thực tế**. Nhân vật KOC của bạn — Mai, Thảo, Duy, Hùng, Lan — là **người hư cấu, không mô phỏng ai thật**. Nên theo nguyên văn hai trường hợp đó, họ **có thể không rơi vào diện bắt buộc**.
++>
++> **Tôi không kết luận điều này, và bạn cũng đừng.** Lý do: (a) tôi đọc qua các trang luật tổng hợp, **không mở được văn bản gốc** (xem mục 6); (b) một nguồn tiếng Anh diễn giải rằng virtual influencer *thuộc* diện phải gắn nhãn — nhưng đó là suy luận của họ, không phải nguyên văn luật; (c) nhân vật AI siêu thực có thể gây nhầm lẫn về tính xác thực, đúng tinh thần điều luật dù không khớp chữ.
++>
++> **Việc phải làm**: đây chính xác là câu hỏi đưa cho luật sư, và giờ nó đã **hỏi được rất gọn**: *"Nhân vật AI hư cấu, không mô phỏng người thật nào, có thuộc diện gắn nhãn bắt buộc theo Điều 11 khoản 4 Luật 134/2025/QH15 và Nghị định 142/2026/NĐ-CP không?"* — một câu, trả lời được bằng một buổi tư vấn.
++>
++> **Khuyến nghị của tôi trong lúc chờ: cứ gắn nhãn.** Chi phí gắn nhãn gần như bằng không, chi phí sai là tới 1 tỷ cộng rủi ro hình sự. Kế hoạch Agnet đã có mục `ai_disclosure` ở Lớp A của KOC — giữ nguyên, đừng tắt.
++
++### 3.2 #3 Thuế TNCN — gỡ cả hai ô chặn. Đây là lý do nó lên hạng 1.
++
++**Đủ 5 bậc — phần tài liệu để trống:**
++
++| Bậc | Thu nhập tính thuế/tháng | Thuế suất | Công thức tính nhanh |
++|---:|---|---:|---|
++| 1 | Đến 10 triệu | 5% | 5% × TNTT |
++| 2 | Trên 10 đến 30 triệu | 10% | 10% × TNTT − 500.000 |
++| 3 | Trên 30 đến 60 triệu | 20% | 20% × TNTT − 3.500.000 |
++| 4 | Trên 60 đến 100 triệu | 30% | 30% × TNTT − 9.500.000 |
++| 5 | Trên 100 triệu | 35% | 35% × TNTT − 14.500.000 |
++
++**Đã kiểm bằng code, không tin bằng mắt**: tôi đối chiếu biểu lũy tiến từng phần với công thức tính nhanh tại 12 mốc thu nhập (5 → 200 triệu). **Khớp tuyệt đối ở cả 12 mốc.** Một bảng bị bịa đặt rất khó có offset nhất quán như vậy — đây là bằng chứng nội tại mạnh. Và **ba ví dụ tính trong tài liệu cốt truyện đều đúng**: A 20tr→225.000đ, B 25tr→475.000đ, C 25tr+1 người phụ thuộc→165.000đ.
++
++**Mốc ngày áp dụng — hóa ra tài liệu đúng cả hai, chúng nói về hai thứ khác nhau:**
++
++- Luật Thuế TNCN sửa đổi: thông qua 10/12/2025, **hiệu lực 01/07/2026**.
++- Nhưng mức giảm trừ 15,5 triệu / 6,2 triệu và biểu 5 bậc **áp dụng từ kỳ tính thuế năm 2026, tức từ 01/01/2026**.
++
++Nên tiêu đề "từ 2026" là **đúng**. Và chính cái vẻ mâu thuẫn này là một đoạn nội dung tốt: "vì sao luật có hiệu lực tháng 7 mà bạn được giảm thuế từ tháng 1".
++
++### 3.3 #4 Lãi suất — gỡ lỗi cấu trúc, và payoff ra **mạnh hơn** dự kiến
++
++Câu hỏi đóng vòng tò mò ("chứng chỉ tiền gửi có được bảo hiểm tiền gửi không") **có câu trả lời**:
++
++- **Có.** Luật Bảo hiểm tiền gửi số **06/2012/QH13** liệt kê tiền gửi được bảo hiểm gồm tiền gửi có kỳ hạn, không kỳ hạn, tiết kiệm, **chứng chỉ tiền gửi**, kỳ phiếu, tín phiếu. Tổ chức tín dụng nhận tiền gửi cá nhân **bắt buộc** tham gia bảo hiểm tiền gửi.
++- **Nhưng có hạn mức, và đây mới là nội dung thật**: **125 triệu đồng** cho **toàn bộ** tiền gửi được bảo hiểm (**gồm cả gốc và lãi**) của **một người** tại **một** tổ chức — theo **Quyết định 32/2021/QĐ-TTg**, hiệu lực **12/12/2021** (trước đó là 75 triệu theo Quyết định 21/2017/QĐ-TTg). Mức này phủ toàn bộ tiền gửi của khoảng **91%** người gửi tiền trong hệ thống.
++
++> **Đây là nâng cấp lớn cho #4.** Ví dụ 500 triệu gửi 3 tháng trong tài liệu giờ có một kết luận sắc hơn hẳn: **gửi 500 triệu một chỗ thì chỉ 125 triệu được bảo hiểm.** Vòng tò mò không chỉ có payoff — nó có một payoff khiến người xem phải hành động (chia tiền ra nhiều tổ chức).
++>
++> Và nó **đổi bản chất video**: từ "so bảng lãi suất" (chết trong vài tuần) thành "hiểu rủi ro khi chạy theo lãi cao" (dùng được lâu). Vì vậy tôi **ra lệnh đổi khung #4**: dẫn bằng hạn mức 125 triệu, bảng lãi suất chỉ là minh họa có hiện ngày. `evergreen` của #4 từ 25 lên được, và nó thoát khỏi cái bẫy "số liệu rữa trước khi kịp quay".
++
++### 3.4 #1 Cúm mùa — gỡ ô chặn duy nhất
++
++Bảng phân biệt cúm / cảm lạnh (phân đoạn 1:30–3:30, 320 từ) đã có nguồn: báo **Sức khỏe & Đời sống — cơ quan của Bộ Y tế**, bài 22/09/2026 "Cúm A, cúm B và cảm lạnh, dấu hiệu nhận biết để không nhầm lẫn". Nội dung dùng được:
++
++| | Cúm mùa | Cảm lạnh |
++|---|---|---|
++| Khởi phát | Đột ngột, triệu chứng toàn thân rõ | Từ từ |
++| Sốt | Vừa đến cao, 39–40°C | Thường không sốt, nếu có thì nhẹ |
++| Đau nhức cơ | Có, dai dẳng nhiều ngày | Rất ít, nếu có thì xuất hiện ngay rồi hết |
++| Ớn lạnh | **Có — dấu hiệu đặc trưng** | Hầu như không |
++| Mệt mỏi | Kéo dài, có thể trên 2 tuần | Nhẹ hoặc vừa |
++| Hay gặp | Đau đầu, viêm họng, khô rát cổ, nghẹt mũi | Nghẹt mũi, chảy nước mũi, hắt hơi, rát họng, ho |
++
++**#1 giờ không còn ô chặn nào. Viết được ngay hôm nay.**
++
++---
++
++## 4. Lệnh sản xuất
++
++### Tuần này
++
++**① #1 Cúm mùa — bắt đầu ngay.**
++Không còn ô chặn. Khớp luồng `suckhoe-yt-sang` đang bật. Và **có đồng hồ**: câu "tăng nhẹ" chỉ đúng tới ngày bản tin 01/10. Nếu không lên sóng trong 1–2 tuần thì phải cập nhật lại số liệu hoặc bỏ. Đây là lý do duy nhất nó đi trước hạng 1.
++
++**② #3 Thuế TNCN — bắt đầu song song, lên sóng ngay sau #1.**
++Hạng 1 mới, `impact` 95 và `reach` 95 — cao nhất cả kho. Đủ 5 bậc, chốt được mốc ngày. Ba điều **bắt buộc** khi viết:
++- Nói rõ 15,5 triệu là mức **giảm trừ**, không phải **ngưỡng lương**. Đây là toàn bộ giá trị của video.
++- Ba ví dụ tính ghi rõ "**ví dụ minh họa của biên tập, chưa tính bảo hiểm bắt buộc và các khoản miễn thuế**".
++- Giải thích cặp ngày 01/07/2026 (luật có hiệu lực) và 01/01/2026 (kỳ tính thuế áp dụng) — đừng né, đó là nội dung tốt.
++
++### Tuần sau
++
++**③ #2 Giấc ngủ — dùng làm bài đo pipeline.**
++`readiness` cao, **không gấp chút nào**. Chính vì không gấp nên đây là bài để chạy thật lần đầu: nếu agent treo như lần 01/10, bạn không mất cơ hội nội dung nào. Cấm tuyệt đối: đổi "liên quan" thành "gây ra"; nói "mới công bố" (nghiên cứu có vẻ từ 23/08/2025). Dùng tiêu đề số 1, không dùng số 2.
++
++**④ #8 Nhãn AI — viết được rồi, nhưng chốt ở cửa luật sư.**
++Ba trong bốn ô đã gỡ, và nội dung giờ **chính xác hơn tài liệu gốc**: tên luật, số điều khoản, hai trường hợp bắt buộc, ngày hiệu lực của cả luật và nghị định, lộ trình ân hạn, và khúc mắc "chưa có nghị định xử phạt riêng". Đổi tiêu đề số 2 thành **"4 cách gắn nhãn hợp lệ theo Nghị định 142/2026, hiệu lực 01/5/2026"** — giờ nói được ngày.
++**Nhưng**: đừng đăng trước khi luật sư trả lời câu ở mục 3.1. Không phải vì video sai, mà vì câu trả lời đó quyết định phân đoạn 10:00–12:30 ("áp vào kênh của bạn") **và** quyết định cách bạn làm 9 video còn lại.
++
++### Sau đó
++
++**⑤ #4 Lãi suất — đổi khung quanh hạn mức 125 triệu** (mục 3.3). Còn phải kiểm: kỳ hạn gắn với từng mức 9% trở lên; cách tính lãi 360 hay 365 ngày; và **cập nhật lại bảng lãi suất tại ngày quay**.
++
++**⑥ #7 AI agent, hoặc ghép #6+#7 thành 18–19 phút.** Đổi mốc tin từ trang tổng hợp sang một thông báo chính thức. Chia nhỏ khối 5 câu hỏi (720 từ liền) thành 5 hình thái khác nhau, không thì tụt giữ chân ở phút 6–8.
++
++**⑦ #9 Retinol** nếu muốn một video rẻ ra lò nhanh. Cần bật luồng `lamdep-tiktok-toi`, và bổ sung nguồn da liễu cho phân đoạn kết (hiện khuyến nghị y tế không nguồn).
++
++### Hoãn, có điều kiện quay lại
++
++**#5 Bỏ thuế khoán** — nghiên cứu lại từ đầu. Nền dữ kiện là bài 18/12/2025 viết *trước* đợt chuyển đổi đã xong 9 tháng. Khi nghiên cứu lại, **đổi góc**: không còn là "chuẩn bị gì" mà là **"9 tháng rồi, hộ kinh doanh vướng ở đâu"** — mạnh hơn hẳn bản cũ.
++
++**#10 Bốn món ăn** — chờ ba nguồn an toàn (xuyên bối mẫu là vị thuốc; hạnh nhân ngọt hay đắng; đường phèn với người đái tháo đường). Là video theo mùa, làm cho mùa thu đông sau không mất gì. Hoãn vì an toàn thân thể, không vì nó dở.
++
++---
++
++## 5. Đã sửa `config/flows.yaml`
++
++Báo cáo trước chỉ ra: chỉ có **1 luồng**, nên chỉ #1 và #2 chạy được. Tôi đã thêm ba luồng cho kế hoạch trên:
++
++| Luồng | Phục vụ | Thời lượng | Trạng thái |
++|---|---|---|---|
++| `taichinh-yt-trua` | #3, #4, #5 | 8–16 phút | **tắt** |
++| `congnghe-yt-chieu` | #6, #7, #8 | 8–16 phút | **tắt** |
++| `lamdep-tiktok-toi` | #9 | 5–10 phút | **tắt** |
++
++**Cả ba đang `enabled: false`, và đó là cố ý.** `CLAUDE.md` ghi rõ: chi phí thật mỗi luồng/ngày chưa biết, và lần chạy thật 01/10 tốn $1,16 cho 4 lượt gọi rồi treo. **Bật từng luồng một**, xem `python -m agnet status` và `cost_ledger`, chốt `max_cost_usd_per_day`, rồi mới bật luồng kế tiếp. Bật cả ba cùng lúc là đốt tiền mù. Tất cả đặt `max_cost_usd_per_day: 1` làm trần an toàn ban đầu.
++
++Mỗi luồng có `brand_rules` rút từ đúng các cảnh báo trong tài liệu cốt truyện — ví dụ luồng tài chính cấm nói "ngân hàng X an toàn", luồng công nghệ buộc gắn "theo nhà cung cấp" vào số liệu nhà cung cấp tự báo.
++
++Đã kiểm: `python -m agnet flows` xác nhận cả 4 luồng hợp lệ. `python -m pytest -q`: **204 passed, 3 skipped**.
++
++**Lưu ý còn lại về thời lượng**: `taichinh-yt-trua` và `congnghe-yt-chieu` đặt `duration_max: 16`, nên **#4 và #8 ở bản 15 phút vẫn vừa**, nhưng `duration_mix` hiện chỉ sinh bucket 8–12. Muốn ra video 15 phút thì đổi `duration_mix` thành `{15-16: 1}` cho ngày đó, hoặc nâng `daily_quota` lên 2 và chia `{8-12: 1, 15-16: 1}`.
++
++---
++
++## 6. Giới hạn của phiên này — đọc trước khi tin hoàn toàn
++
++Tôi phải nói rõ, vì chính dự án này cấm bịa và cấm nói quá chắc:
++
++**Tôi không mở được văn bản gốc nào.** WebFetch bị chặn egress với toàn bộ các domain tôi cần: `thuvienphapluat.vn`, `luatvietnam.vn`, `luatvietan.vn`, `luatlongphan.vn`, `baochinhphu.vn`. Mọi dữ kiện ở mục 3 đến từ **phần tóm tắt kết quả tìm kiếm**, tổng hợp từ nhiều trang luật và báo. Nghĩa là **vẫn là nguồn thứ cấp** — đúng cái vấn đề tài liệu gốc đã gặp, chỉ bớt tệ hơn vì nhiều nguồn độc lập nói giống nhau.
++
++**Việc bắt buộc trước khi lên sóng** (không phải lựa chọn):
++
++- [ ] **#8**: mở toàn văn **Luật 134/2025/QH15** và **Nghị định 142/2026/NĐ-CP** trên cổng văn bản chính thức. Xác nhận: Điều 11 khoản 4; hai trường hợp bắt buộc; 4 hình thức gắn nhãn; ngày hiệu lực 01/05/2026; lộ trình 01/03/2027 và 01/09/2027.
++- [ ] **#8**: hỏi luật sư đúng một câu ở mục 3.1 về nhân vật AI hư cấu.
++- [ ] **#3**: đối chiếu bảng 5 bậc với **Luật Thuế TNCN sửa đổi** và **Nghị quyết 110/2025/UBTVQH15**. Bảng đã nhất quán nội tại ở 12 mốc, nhưng nhất quán **không phải** là đúng luật.
++- [ ] **#4**: đối chiếu hạn mức 125 triệu với **Quyết định 32/2021/QĐ-TTg** và trang Bảo hiểm tiền gửi Việt Nam (`div.gov.vn`) — kiểm xem đã có quyết định mới hơn chưa (quyết định này từ 2021, đã 5 năm).
++- [ ] **#1**: lấy bản tin gốc của Cục Phòng bệnh ngày 01/10/2026, không chỉ bài báo lại tin.
++
++Nếu bạn mở được các trang này trên máy mình (không qua proxy của phiên này), đó là việc nửa giờ và nó biến toàn bộ mục 3 từ "thứ cấp nhiều nguồn" thành "đã xác minh".
++
++---
++
++## 7. Nguồn đã dùng trong phiên xác minh 02/10/2026
++
++**Luật AI và gắn nhãn nội dung AI**
++- Thư viện pháp luật, "Quy định mới về thông báo và gắn nhãn hiển thị với nội dung do AI tạo ra từ ngày 01/5/2026": https://thuvienphapluat.vn/chinh-sach-phap-luat-moi/vn/ho-tro-phap-luat/chinh-sach-moi/111755/quy-dinh-moi-ve-thong-bao-va-gan-nhan-hien-thi-voi-noi-dung-do-ai-tao-ra-tu-ngay-01-5-2026
++- Thư viện pháp luật, Nghị định 142/2026/NĐ-CP hướng dẫn Luật Trí tuệ nhân tạo: https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Nghi-dinh-142-2026-ND-CP-huong-dan-Luat-Tri-tue-nhan-tao-696080.aspx
++- LuatVietnam, "2 trường hợp nội dung do AI tạo ra bắt buộc phải gắn nhãn từ 01/5/2026": https://luatvietnam.vn/tin-van-ban-moi/2-truong-hop-noi-dung-do-ai-tao-ra-bat-buoc-phai-gan-nhan-tu-01-5-2026-186-108836-article.html
++- Báo Chính phủ, "Việt Nam chính thức có Luật Trí tuệ nhân tạo (AI)": https://baochinhphu.vn/viet-nam-chinh-thuc-co-luat-tri-tue-nhan-tao-ai-102251210164948585.htm
++- Xây dựng chính sách (Chính phủ), "6 luật có hiệu lực thi hành từ ngày 1/3/2026": https://xaydungchinhsach.chinhphu.vn/6-luat-co-hieu-luc-thi-hanh-tu-ngay-1-3-2026-119260301164943626.htm
++- PLO, "Ai phải gắn nhãn nhận biết nội dung do AI tạo ra?": https://plo.vn/ai-phai-gan-nhan-nhan-biet-noi-dung-do-ai-tao-ra-post907652.html
++- Tuổi Trẻ, "Lần đầu trình Quốc hội luật về trí tuệ nhân tạo, phạt tối đa 2 tỉ đồng hành vi vi phạm về AI": https://tuoitre.vn/lan-dau-trinh-quoc-hoi-luat-ve-tri-tue-nhan-tao-phat-toi-da-2-ti-dong-hanh-vi-vi-pham-ve-ai-20251121085727822.htm
++- Tiền Phong, "Vi phạm về trí tuệ nhân tạo có thể bị truy cứu trách nhiệm hình sự, phạt tiền 2 tỷ đồng": https://tienphong.vn/vi-pham-ve-tri-tue-nhan-tao-co-the-bi-truy-cuu-trach-nhiem-hinh-su-phat-tien-2-ty-dong-post1798152.tpo
++- Baker McKenzie, "Vietnam's first standalone AI Law": https://connectontech.bakermckenzie.com/vietnams-first-standalone-ai-law-an-overview-of-key-provisions-future-implications/
++- Securiti, "Vietnam's Law on Artificial Intelligence: A Guide to Compliance": https://securiti.ai/vietnam-ai-aw/
++
++**Thuế thu nhập cá nhân 2026**
++- LuatVietnam, "Cách tính thuế TNCN 2026 theo mức giảm trừ gia cảnh mới": https://luatvietnam.vn/thue-phi-le-phi/cach-tinh-thue-tncn-2026-565-106276-article.html
++- Quân đội nhân dân, "Từ 1-7-2026, người lao động được giảm thuế nhờ nâng giảm trừ gia cảnh": https://www.qdnd.vn/kinh-te/tin-tuc/tu-1-7-2026-nguoi-lao-dong-duoc-giam-thue-nho-nang-giam-tru-gia-canh-1019067
++- VnEconomy, "Từ 2026, nâng mức giảm trừ gia cảnh thuế thu nhập cá nhân lên 15,5 triệu đồng/tháng": https://vneconomy.vn/tu-2026-nang-muc-giam-tru-gia-canh-thue-thu-nhap-ca-nhan-len-155-trieu-dongthang.htm
++- VietNamNet, "Thay đổi lớn về giảm trừ gia cảnh từ 2026": https://vietnamnet.vn/thay-doi-lon-ve-giam-tru-gia-canh-tu-2026-hang-chuc-trieu-nguoi-dan-huong-loi-2474898.html
++
++**Bảo hiểm tiền gửi**
++- Luật Bảo hiểm tiền gửi số 06/2012/QH13 (cổng văn bản Chính phủ): https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=163543
++- Bảo hiểm tiền gửi Việt Nam, "Từ ngày 12/12/2021, hạn mức trả tiền bảo hiểm là 125 triệu đồng": https://www.div.gov.vn/tu-ngay-12-12-2021-han-muc-tra-tien-bao-hiem-la-125-trieu-dong
++- Báo Chính phủ, "Nâng hạn mức trả tiền bảo hiểm tiền gửi lên 125 triệu đồng": https://baochinhphu.vn/nang-han-muc-tra-tien-bao-hiem-tien-gui-len-125-trieu-dong-102302543.htm
++
++**Cúm mùa và cảm lạnh**
++- Sức khỏe & Đời sống (Bộ Y tế), "Cúm A, cúm B và cảm lạnh, dấu hiệu nhận biết thế nào để không nhầm lẫn" (22/09/2026): https://suckhoedoisong.vn/cum-a-cum-b-va-cam-lanh-dau-hieu-nhan-biet-de-khong-nham-lan-169260922113710429.htm
++- VietnamPlus, "Phân biệt dấu hiệu của cảm lạnh và cảm cúm để phòng ngừa, điều trị": https://www.vietnamplus.vn/phan-biet-dau-hieu-cua-cam-lanh-va-cam-cum-de-phong-ngua-bien-chung-post1011589.vnp
++
++*Ghi chú: mọi dữ kiện trên đến từ phần tóm tắt kết quả tìm kiếm, không phải từ việc mở trực tiếp văn bản gốc (xem mục 6). Tài liệu này không phải tư vấn pháp lý, y tế hay tài chính.*
+diff --git a/config/flows.yaml b/config/flows.yaml
+index f00eb4d..74d2ac6 100644
+--- a/config/flows.yaml
++++ b/config/flows.yaml
+@@ -32,3 +32,124 @@ flows:
+     catchup_until: "12:00"   # nhưng chỉ bù nếu còn trước 12:00 trưa (giờ Asia/Bangkok)
+     run_timeout_min: 180     # quá 3 giờ chưa xong thì dừng, báo lỗi, chờ ngày mai
+     notify: [telegram]       # báo kết quả qua Telegram (khoá đặt trong .env)
++
++  # ------------------------------------------------------------------
++  # Ba luồng dưới đây thêm ngày 02/10/2026 theo quyết định sản xuất
++  # (xem "Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md").
++  #
++  # TẤT CẢ ĐANG enabled: false — CÓ CHỦ Ý.
++  # Lý do: chi phí thật mỗi luồng/ngày chưa đo. Lần chạy thật 01/10/2026
++  # tốn $1,16 cho 4 lượt gọi rồi treo. Bật từng luồng MỘT, xem
++  # `python -m agnet status` và bảng cost_ledger, chốt max_cost_usd_per_day
++  # rồi mới bật luồng tiếp theo. Bật cả ba cùng lúc là đốt tiền mù.
++  # Bật: đổi enabled thành true, rồi `python -m agnet flows` để kiểm.
++  # ------------------------------------------------------------------
++
++  - id: taichinh-yt-trua
++    name: "Tài chính & thuế – YouTube trưa"
++    enabled: false
++    topic: "Thuế, lãi suất, tiền cá nhân cho người đi làm và hộ kinh doanh"
++    seed_keywords: ["thuế thu nhập cá nhân", "giảm trừ gia cảnh", "lãi suất tiết kiệm", "hộ kinh doanh", "bảo hiểm tiền gửi"]
++    exclude_keywords: ["khuyến nghị mua bán", "mã chứng khoán", "tiền ảo", "lãi kép thần thánh"]
++    audience: "Người đi làm ăn lương và chủ hộ kinh doanh 25–50 tuổi tại Việt Nam"
++    region: VN
++    language: vi
++    platform: youtube
++    aspect_ratio: "16:9"
++    duration_min: 8
++    duration_max: 16
++    duration_mix: {8-12: 1}
++    daily_quota: 1
++    schedule: [10 11 * * *]
++    timezone: Asia/Bangkok
++    sources: [google_trends, youtube, rss_vn]
++    tone: "Bình tĩnh, tính bằng ví dụ, không hứa làm giàu"
++    narrator_persona: "Người am hiểu thuế, xưng 'mình', luôn nhắc đối chiếu kế toán/cơ quan thuế"
++    cta_style: "Lưu lại để tính lại khi quyết toán"
++    brand_rules:
++      - "Không khuyên gửi/không gửi, không khuyên mua sản phẩm tài chính nào"
++      - "Không nói ngân hàng X an toàn hay không an toàn"
++      - "Mọi ví dụ tính phải ghi rõ 'ví dụ minh họa của biên tập', nêu quy ước tính"
++      - "Luôn hiện ngày của số liệu trên màn hình: lãi suất và văn bản thuế đổi nhanh"
++    title_style: curiosity
++    strict_factcheck: true
++    sensitive: true
++    human_review: true
++    max_cost_usd_per_day: 1
++    output_dir: output
++    catchup: true
++    catchup_until: "15:00"
++    run_timeout_min: 180
++    notify: [telegram]
++
++  - id: congnghe-yt-chieu
++    name: "Công nghệ & AI thực dụng – YouTube chiều"
++    enabled: false
++    topic: "AI dùng được trong đời sống và công việc, kèm giới hạn và rủi ro"
++    seed_keywords: ["AI agent", "trợ lý AI", "gắn nhãn nội dung AI", "quyền truy cập", "tự động hoá tiệm nhỏ"]
++    exclude_keywords: ["kiếm tiền với AI", "khoá học", "tin đồn mô hình mới", "rò rỉ"]
++    audience: "Người dùng và chủ việc nhỏ 22–45 tuổi, muốn dùng AI mà không bị hớ"
++    region: VN
++    language: vi
++    platform: youtube
++    aspect_ratio: "16:9"
++    duration_min: 8
++    duration_max: 16
++    duration_mix: {8-12: 1}
++    daily_quota: 1
++    schedule: [10 15 * * *]
++    timezone: Asia/Bangkok
++    sources: [google_trends, youtube, rss_vn]
++    tone: "Tỉnh táo, thử trước rồi nói, nêu rõ cái gì chưa kiểm được"
++    narrator_persona: "Người dùng cẩn thận, xưng 'mình', không thần thánh hoá công nghệ"
++    cta_style: "Lưu lại để dùng khi cài đặt"
++    brand_rules:
++      - "Số liệu do nhà cung cấp tự báo: luôn kèm 'theo nhà cung cấp', không trình bày như số liệu độc lập"
++      - "Không dùng tin đồn chưa có thông báo chính thức làm dữ kiện"
++      - "Nội dung pháp lý: nêu đúng văn bản, số điều khoản, ngày hiệu lực; không kết luận thay luật sư"
++    title_style: curiosity
++    strict_factcheck: true
++    sensitive: false
++    human_review: true      # bật dù không sensitive: nhóm này chạm nội dung pháp lý
++    max_cost_usd_per_day: 1
++    output_dir: output
++    catchup: true
++    catchup_until: "19:00"
++    run_timeout_min: 180
++    notify: [telegram]
++
++  - id: lamdep-tiktok-toi
++    name: "Làm đẹp có dẫn nguồn – TikTok tối"
++    enabled: false
++    topic: "Chăm sóc da và làm đẹp: phá định kiến bằng nguồn y khoa"
++    seed_keywords: ["retinol", "vitamin C", "kem chống nắng", "thành phần kỵ nhau", "quy trình skincare"]
++    exclude_keywords: ["review hãng", "mã giảm giá", "trị nám cấp tốc", "kem trộn"]
++    audience: "Người 18–35 tuổi quan tâm chăm sóc da, hay gặp thông tin trái chiều"
++    region: VN
++    language: vi
++    platform: tiktok
++    aspect_ratio: "9:16"
++    duration_min: 5
++    duration_max: 10
++    duration_mix: {5-8: 1}
++    daily_quota: 1
++    schedule: [10 19 * * *]
++    timezone: Asia/Bangkok
++    sources: [google_trends, youtube, rss_vn, pubmed]
++    tone: "Gọn, cụ thể, mỗi khẳng định một nguồn"
++    narrator_persona: "Người đọc tài liệu kỹ, xưng 'mình', không hứa hiệu quả"
++    cta_style: "Lưu lại quy trình"
++    brand_rules:
++      - "Không nêu tên hãng, không so sánh sản phẩm"
++      - "Không hứa hiệu quả, không nói 'trị khỏi'"
++      - "Da nhạy cảm, đang có bệnh da, mang thai: luôn chuyển sang bác sĩ da liễu"
++    title_style: curiosity
++    strict_factcheck: true
++    sensitive: true
++    human_review: true
++    max_cost_usd_per_day: 1
++    output_dir: output
++    catchup: true
++    catchup_until: "23:00"
++    run_timeout_min: 120
++    notify: [telegram]
+diff --git a/scripts/rank_cot_truyen.py b/scripts/rank_cot_truyen.py
+new file mode 100644
+index 0000000..225ffd4
+--- /dev/null
++++ b/scripts/rank_cot_truyen.py
+@@ -0,0 +1,103 @@
++# -*- coding: utf-8 -*-
++"""Xếp hạng ưu tiên 10 cốt truyện trong 'Claude outputs/COT_TRUYEN_2026-10-01.md'.
++
++ĐÂY KHÔNG PHẢI Trend Score. Ba thành phần nặng nhất của Trend Score —
++velocity (0,22), volume (0,18), engagement (0,15), tổng 55% trọng số — hiện
++KHÔNG có dữ liệu thật vì chưa có connector (xem mục "Chưa có" trong CLAUDE.md).
++Theo quy tắc cứng số 1, không ước lượng cho đủ: script này chỉ chấm những
++thành phần đọc và kiểm được từ chính tài liệu cốt truyện.
++
++Khi đã có connector số liệu thật, hãy chấm lại bằng agnet.core.scoring.
++
++Đổi trọng số trong W rồi chạy lại:  python scripts/rank_cot_truyen.py
++Báo cáo đi kèm: Claude outputs/PHAN_TICH_UU_TIEN_2026-10-02.md
++"""
++
++W = {  # tong = 1.00
++    "suc_hut":      0.20,  # hook + vong to mo + so lieu de nho
++    "impact":       0.14,  # he qua voi nguoi xem (tien / suc khoe / phap ly)
++    "reach":        0.14,  # do rong tap khan gia VN
++    "evergreen":    0.12,  # con gia tri sau 30 ngay
++    "freshness":    0.12,  # tuoi cua moc tin (theo NGAY ghi trong tai lieu)
++    "source_trust": 0.10,
++    "readiness":    0.11,  # nguoc cua so o trong chan phan loi thoai
++    "risk_low":     0.07,  # nguoc cua rui ro QA / phap ly / an toan
++}
++PULL = ["suc_hut", "impact", "reach", "evergreen", "freshness"]
++SHIP = ["source_trust", "readiness", "risk_low"]
++
++# id: (ten ngan, {thanh phan: diem})
++S = {
++ 1: ("Cum mua: co nen tu mua thuoc?",
++     dict(suc_hut=80, impact=85, reach=90, evergreen=55, freshness=95, source_trust=85, readiness=75, risk_low=68)),
++ 2: ("Ngu bao nhieu tieng la du?",
++     dict(suc_hut=88, impact=78, reach=88, evergreen=88, freshness=55, source_trust=80, readiness=82, risk_low=70)),
++ 3: ("Luong bao nhieu thi dong thue 2026?",
++     dict(suc_hut=85, impact=95, reach=95, evergreen=75, freshness=62, source_trust=88, readiness=40, risk_low=55)),
++ 4: ("Lai suat 4,75% hay 9%?",
++     dict(suc_hut=92, impact=82, reach=60, evergreen=25, freshness=88, source_trust=78, readiness=42, risk_low=45)),
++ 5: ("Bo thue khoan: ho kinh doanh",
++     dict(suc_hut=72, impact=90, reach=48, evergreen=68, freshness=35, source_trust=70, readiness=30, risk_low=52)),
++ 6: ("AI truc dien thoai tieng Viet",
++     dict(suc_hut=64, impact=52, reach=35, evergreen=50, freshness=85, source_trust=45, readiness=65, risk_low=88)),
++ 7: ("AI agent: 5 cau hoi truoc khi Cho phep",
++     dict(suc_hut=74, impact=65, reach=55, evergreen=85, freshness=72, source_trust=38, readiness=68, risk_low=90)),
++ 8: ("Video AI phai gan nhan tu 2026",
++     dict(suc_hut=80, impact=90, reach=62, evergreen=82, freshness=70, source_trust=85, readiness=35, risk_low=38)),
++ 9: ("Retinol va vitamin C",
++     dict(suc_hut=84, impact=55, reach=72, evergreen=92, freshness=15, source_trust=62, readiness=70, risk_low=62)),
++10: ("Bon mon an ngay se kho",
++     dict(suc_hut=66, impact=40, reach=68, evergreen=70, freshness=8,  source_trust=42, readiness=50, risk_low=40)),
++}
++
++# ---------------------------------------------------------------------------
++# Cập nhật 02/10/2026 — sau khi ĐÃ XÁC MINH bằng tìm kiếm thật.
++# Chỉ sửa thành phần nào có bằng chứng mới; mọi thành phần khác giữ nguyên.
++# Nguồn và nội dung từng phát hiện: Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md
++# ---------------------------------------------------------------------------
++SAU_XAC_MINH = {
++    # Bảng phân biệt cúm/cảm lạnh: có nguồn báo Sức khỏe & Đời sống (Bộ Y tế) 22/09/2026
++    1: dict(readiness=85),
++    # Đủ 5 bậc thuế (đã kiểm nhất quán bằng code) + chốt được mốc ngày áp dụng
++    3: dict(readiness=82),
++    # Trả lời được câu bảo hiểm tiền gửi; hạn mức 125 triệu làm hook mạnh hơn trước
++    4: dict(readiness=70, suc_hut=95, risk_low=52),
++    # Nghị định 142/2026 hiệu lực 01/05/2026, Điều 11.4, mức phạt, lộ trình tuân thủ
++    8: dict(readiness=72, source_trust=88, risk_low=55),
++}
++
++APPLY_SAU_XAC_MINH = True   # đặt False để xem lại thứ hạng ngày 01/10 (trước xác minh)
++if APPLY_SAU_XAC_MINH:
++    for _i, _patch in SAU_XAC_MINH.items():
++        S[_i][1].update(_patch)
++
++assert abs(sum(W.values()) - 1.0) < 1e-9, sum(W.values())
++for i, (n, c) in S.items():
++    assert set(c) == set(W), (i, set(W) ^ set(c))
++
++def wavg(c, keys):
++    tot = sum(W[k] for k in keys)
++    return sum(W[k] * c[k] for k in keys) / tot
++
++rows = []
++for i, (name, c) in S.items():
++    rows.append((round(sum(W[k] * c[k] for k in W), 1), round(wavg(c, PULL), 1), round(wavg(c, SHIP), 1), i, name, c))
++rows.sort(key=lambda r: -r[0])
++
++hdr = f"{'Hang':<5}{'#':<4}{'Cot truyen':<40}{'Tong':>6}{'Hut':>6}{'San sang':>10}"
++print(hdr); print("-" * len(hdr))
++for rank, (tot, pull, ship, i, name, c) in enumerate(rows, 1):
++    print(f"{rank:<5}{i:<4}{name:<40}{tot:>6}{pull:>6}{ship:>10}")
++
++print("\n--- Chi tiet thanh phan (theo hang) ---")
++ks = list(W)
++print(f"{'#':<4}" + "".join(f"{k[:9]:>11}" for k in ks))
++for tot, pull, ship, i, name, c in rows:
++    print(f"{i:<4}" + "".join(f"{c[k]:>11}" for k in ks))
++
++print("\n--- Neu chi toi uu LUONG XEM (bo readiness/risk/source_trust) ---")
++for rank, r in enumerate(sorted(rows, key=lambda r: -r[1]), 1):
++    print(f"{rank:<3} #{r[3]:<3} {r[4]:<40} {r[1]}")
++print("\n--- Neu chi toi uu TOC DO LEN SONG ---")
++for rank, r in enumerate(sorted(rows, key=lambda r: -r[2]), 1):
++    print(f"{rank:<3} #{r[3]:<3} {r[4]:<40} {r[2]}")
