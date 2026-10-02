@@ -92,8 +92,8 @@ class Pipeline:
                 res = read_survey(await self.call(name, {"task": "enrich", "story": story}))
             except BudgetExceeded:
                 raise
-            except (AgentError, ValueError) as e:
-                self.errors.append(f"{name}: {e}")
+            except Exception as e:                          # noqa: BLE001 — lỗi enrich không được làm sập kịch bản/lần chạy
+                self.errors.append(f"{name}: {type(e).__name__}: {e}")
                 continue
             out[name] = res.as_dict()
             hints = gap_hints(res.items)
@@ -182,7 +182,7 @@ class Pipeline:
             return StoryOutcome(title, "reject", None, note), None, ""
         except BudgetExceeded:
             raise
-        except (AgentError, KeyError, TypeError, ValueError) as e:
+        except Exception as e:                              # noqa: BLE001 — một kịch bản hỏng không được làm sập cả lần chạy
             return StoryOutcome(title, "error", None, f"{type(e).__name__}: {e}"[:200]), None, ""
 
     # ---- cả luồng -------------------------------------------------------------
@@ -240,6 +240,9 @@ class Pipeline:
             status = f"dừng vì hết ngân sách: {e}"
         except SurveyEmpty as e:
             status = f"dừng: {e}"
+        except Exception as e:                              # noqa: BLE001 — luôn ghi báo cáo + đóng bản ghi runs, không để kẹt 'running'
+            status = f"lỗi: {type(e).__name__}: {e}"[:300]
+            self.errors.append(status)
         self.errors.extend(w for w in getattr(self.runner, "warnings", []) if w not in self.errors)
         spent = self.store.spent_today(self.flow.id, self.today)
         report = export.daily_report(self.flow.id, day, [o.__dict__ for o in outcomes], spent, status, self.errors)

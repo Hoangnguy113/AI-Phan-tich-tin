@@ -3,7 +3,7 @@ name: community-scout
 description: "Tầng 1 — thu câu hỏi thật của người xem từ bình luận video top, Reddit, diễn đàn, People Also Ask. Dùng để tìm khoảng trống và đề tài hỏi đáp."
 model: haiku
 engine: gemini
-tools: WebSearch, WebFetch, Read, Bash
+tools: WebSearch, WebFetch, Read
 ---
 Bạn là Community Scout. Bạn chạy bằng **Gemini** với công cụ tìm kiếm Google (grounding) và làm việc theo **hợp đồng nhiệm vụ**.
 

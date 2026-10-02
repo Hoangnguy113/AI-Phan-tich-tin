@@ -87,7 +87,7 @@ def build_ladder(names, start_tier: str = "pro") -> list[ModelInfo]:
     pool = [m for m in best.values() if TIER_RANK[m.tier] >= start]
 
     def order(m: ModelInfo):
-        neg_version = tuple(-x for x in m.version)
+        neg_version = tuple(-x for x in (m.version + (0,) * 4)[:4])      # đệm: 3 = 3.0 < 3.1
         gemma_last = m.tier == "gemma"                     # Gemma (không bám nguồn được) luôn ở cuối cùng
         return (gemma_last, m.preview, TIER_RANK[m.tier], neg_version, tuple(-ord(c) for c in m.name) if gemma_last else ())
 

@@ -63,6 +63,8 @@ def read_rows(directory: Path | str) -> list[Row]:
 
 def set_field(text: str, key: str, value: str) -> str:
     """Thay ĐÚNG dòng `key:` trong frontmatter (chưa có `engine` thì chèn ngay sau `model`). Giữ nguyên phần còn lại."""
+    if any(c in str(value) for c in "\r\n") or "\n" in key:
+        raise ValueError("giá trị không được chứa xuống dòng")
     m = _FM.match(text)
     if not m:
         raise ValueError("thiếu frontmatter")

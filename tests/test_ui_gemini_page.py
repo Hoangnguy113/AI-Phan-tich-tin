@@ -18,7 +18,7 @@ from agnet.ui import i18n                              # noqa: E402
 from agnet.ui.page_gemini import GeminiPage            # noqa: E402
 from agnet.ui.page_settings import SettingsPage        # noqa: E402
 
-KEY = "AIzaSyFAKEKEY1234567890SECRETVALUE"
+KEY = "AIza" + "x" * 35
 MODELS = {"models": [{"name": "models/gemini-2.5-pro", "supportedGenerationMethods": ["generateContent"]},
                      {"name": "models/gemini-2.5-flash", "supportedGenerationMethods": ["generateContent"]}]}
 OK_BODY = json.dumps({"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}).encode()

@@ -13,9 +13,12 @@ Khoá chỉ đi qua header, không bao giờ vào URL, log hay thông báo lỗi
 from __future__ import annotations
 
 import json
+import os
 import re
+import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
@@ -147,6 +150,7 @@ class GeminiClient:
         self._now, self._sleep = clock, sleep
         self.timeout, self.server_retries = timeout, server_retries
         self._ladder: list[ModelInfo] | None = None
+        self._lock = threading.RLock()                      # GeminiRunner gọi từ nhiều luồng (asyncio.to_thread)
         self._cool: dict[str, float] = {}                  # model -> thời điểm được dùng lại
         self._load_cache()
 
@@ -162,15 +166,16 @@ class GeminiClient:
             pass
 
     def _save_cache(self) -> None:
-        d = dict(self._cache)
-        d["cooldowns"] = {k: v for k, v in self._cool.items() if v > self._now()}
-        try:
-            self.cache_path.parent.mkdir(parents=True, exist_ok=True)
-            tmp = self.cache_path.with_suffix(".tmp")
-            tmp.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-            tmp.replace(self.cache_path)
-        except OSError:
-            pass                                           # cache hỏng không được làm sập lượt gọi
+        with self._lock:
+            d = dict(self._cache)
+            d["cooldowns"] = {k: v for k, v in list(self._cool.items()) if v > self._now()}
+            try:
+                self.cache_path.parent.mkdir(parents=True, exist_ok=True)
+                tmp = self.cache_path.with_name(f"{self.cache_path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+                tmp.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+                tmp.replace(self.cache_path)
+            except OSError:
+                pass                                           # cache hỏng không được làm sập lượt gọi
 
     # ---- danh sách model & thang ---------------------------------------------------------------------
     def _headers(self) -> dict:
@@ -179,7 +184,7 @@ class GeminiClient:
     def list_models(self) -> list[str]:
         names, token = [], ""
         for _ in range(20):
-            url = f"{BASE}/models?pageSize=200" + (f"&pageToken={token}" if token else "")
+            url = f"{BASE}/models?pageSize=200" + (f"&pageToken={urllib.parse.quote(token, safe='')}" if token else "")
             status, body = self._tx("GET", url, self._headers(), None, self.timeout)
             self._raise_auth(status, body)
             if status != 200:
@@ -257,7 +262,7 @@ class GeminiClient:
         for idx, m in enumerate(self.ladder()):             # 429 → model đó nghỉ, hạ xuống model thấp hơn
             if search and not m.grounding:                  # Gemma không có Google Search → bỏ qua khi cần bám nguồn
                 continue
-            if self._cool.get(self._ck(m, search), 0) > self._now():
+            if max(self._cool.get(self._ck(m, search), 0), self._cool.get(m.name, 0)) > self._now():
                 attempts.append({"model": m.name, "outcome": "cooling"})
                 continue
             res = self._try_model(m, body, attempts, search)
@@ -274,7 +279,8 @@ class GeminiClient:
                     continue
                 p = self._try_model(m, json.dumps(plain).encode("utf-8"), [], False)
                 if p is not None:
-                    self._cool[SEARCH_KEY] = self._now() + SEARCH_BLOCK_S
+                    with self._lock:
+                        self._cool[SEARCH_KEY] = self._now() + SEARCH_BLOCK_S
                     self._save_cache()
                     if not allow_ungrounded:
                         raise GroundingUnavailable(
@@ -290,13 +296,13 @@ class GeminiClient:
         return m.name + ("#search" if search else "")
 
     def _try_model(self, m: ModelInfo, body: bytes, attempts: list[dict], search: bool = False) -> GeminiResult | None:
-        url = f"{BASE}/models/{m.name}:generateContent"
+        url = f"{BASE}/models/{urllib.parse.quote(m.name, safe='')}:generateContent"
         for n in range(self.server_retries + 1):
             status, raw = self._tx("POST", url, self._headers(), body, self.timeout)
             if status == 200:
                 try:
                     res = self._parse(m.name, raw)
-                except (ValueError, KeyError):
+                except Exception:                           # IndexError/AttributeError... — thân lạ đều coi là bad_response
                     attempts.append({"model": m.name, "outcome": "bad_response"})
                     return None
                 attempts.append({"model": m.name, "outcome": "ok"})
@@ -304,12 +310,14 @@ class GeminiClient:
             self._raise_auth(status, raw)
             if status == 429:
                 until, daily = parse_quota_error(raw, self._now())
-                self._cool[self._ck(m, search)] = until
+                with self._lock:
+                    self._cool[self._ck(m, search)] = until
                 self._save_cache()
                 attempts.append({"model": m.name, "outcome": "quota_daily" if daily else "quota_minute"})
                 return None
             if status == 404:
-                self._cool[m.name] = self._now() + 24 * 3600
+                with self._lock:
+                    self._cool[m.name] = self._now() + 24 * 3600
                 self._save_cache()
                 attempts.append({"model": m.name, "outcome": "not_found"})
                 return None
@@ -349,9 +357,10 @@ class GeminiClient:
         except GeminiAuthError as e:
             rep["key"], rep["note"] = "bad", str(e)
             return rep
-        except GeminiError as e:
-            rep["key"], rep["note"] = "error", str(e)
+        except (GeminiError, ValueError) as e:
+            rep["key"], rep["note"] = "error", f"{type(e).__name__}: {e}"[:200]
             return rep
+        self._cool.clear()                                  # người dùng bấm kiểm tra = muốn thử lại thật, không bị kẹt cooldown cũ
         self._cache["fetched_at"], self._cache["models"] = self._now(), names
         self._save_cache()
         self._ladder = None
@@ -375,7 +384,7 @@ class GeminiClient:
         """Thang hiện tại kèm trạng thái nghỉ — để giao diện hiển thị."""
         now, out = self._now(), []
         for m in self.ladder():
-            cd = self._cool.get(m.name, 0)
+            cd = max(self._cool.get(m.name, 0), self._cool.get(m.name + "#search", 0))
             out.append({"name": m.name, "tier": m.tier, "version": ".".join(map(str, m.version)),
                         "preview": m.preview, "cooldown_s": max(0, int(cd - now))})
         return out

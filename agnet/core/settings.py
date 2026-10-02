@@ -28,7 +28,7 @@ class Settings:
     theme: str = "system"
     concurrency: int = 3                    # số agent chạy song song (Pipeline.concurrency)
     gemini_provider: str = "off"            # off | gemini_api | gemini_cli
-    gemini_model: str = "gemini-2.5-flash"  # model ghim tay; chỉ dùng khi tắt tự cập nhật (chưa kiểm chứng trên máy này)
+    gemini_model: str = "gemini-flash-latest"  # model ghim tay, chỉ dùng khi tắt tự cập nhật (bí danh *-latest tồn tại trên khoá đã đo 02/10/2026; dòng 2.5 trả 404)
     gemini_auto_update: bool = True         # tự tải lại danh sách model từ Google để thấy model mới
     gemini_fallback: bool = True            # hết định mức (429) thì xuống model thấp hơn
     gemini_tier: str = "pro"                # bậc muốn dùng trước: pro > flash > flash-lite

@@ -37,7 +37,7 @@ def test_cua_so_chinh_co_10_muc_va_dich(tmp_path):
     assert [nav.item(i).text() for i in range(nav.count())][:2] == ["Bảng điều khiển", "Kho kịch bản"]
     assert nav.count() == 10
     assert nav.item(4).text() == "Đội agent" and nav.item(5).text() == "Hợp đồng & tỉ lệ đạt"
-    assert "Ctrl+1…9" in w.shell.footer.text()
+    assert "Ctrl+1…0" in w.shell.footer.text()
     i18n.apply(w, "en")
     assert nav.item(0).text() == "Dashboard"
     i18n.apply(w, "vi")

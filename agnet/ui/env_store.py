@@ -4,6 +4,7 @@ Chỉ thay đúng dòng cần sửa để giữ comment và các khoá khác (AN
 """
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -27,7 +28,13 @@ def _lines(p: Path) -> list[str]:
 
 def _write(p: Path, lines: list[str]) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
-    p.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    tmp = p.with_name(p.name + ".tmp")
+    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    try:
+        os.chmod(tmp, 0o600)                       # chứa khoá: chỉ chủ sở hữu đọc được
+    except OSError:
+        pass
+    os.replace(tmp, p)                             # nguyên tử: lỗi giữa chừng không làm cụt .env
 
 
 def _set(p: Path, name: str, value: str) -> None:

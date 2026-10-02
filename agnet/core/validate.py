@@ -135,7 +135,7 @@ def validate_script(doc: dict[str, Any], flow: Flow | None = None) -> list[Issue
 
     # --- 7. QA & kiểm duyệt tay ---------------------------------------------
     qa = doc["qa"]
-    if qa["score"] < 8:
+    if not (qa["score"] >= 8):            # `not >=` để NaN cũng bị loại
         issues.append(Issue("error", "qa/score", f"điểm QA {qa['score']} < 8 (mục 9) — không được xuất"))
     if flow and (flow.sensitive or flow.human_review) and not qa["human_review_required"]:
         issues.append(Issue("error", "qa/human_review_required", "luồng nhạy cảm/human_review phải gắn human_review_required=true"))

@@ -12,7 +12,7 @@ from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 FMT = "%(asctime)s %(levelname)-7s %(name)-18s %(message)s"
-SECRET_KEYS = ("ANTHROPIC_API_KEY", "YOUTUBE_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
+SECRET_KEYS = ("ANTHROPIC_API_KEY", "GEMINI_API_KEY", "YOUTUBE_API_KEY", "TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID")
 
 
 class RedactSecrets(logging.Filter):

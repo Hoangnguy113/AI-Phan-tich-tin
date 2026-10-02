@@ -150,7 +150,7 @@ class CostPage(QWidget):
         week: dict[str, float] = {}
         capped = 0
         if store:
-            cut = (today - timedelta(days=7)).isoformat()
+            cut = (today - timedelta(days=6)).isoformat()        # 7 ngày lịch gồm cả hôm nay
             with store._conn() as c:                           # đọc tổng, đúng mốc 'today' của trang
                 for r in c.execute("SELECT flow_id, SUM(usd) s FROM cost_ledger WHERE day >= ? GROUP BY flow_id", (cut,)):
                     week[r["flow_id"]] = float(r["s"])

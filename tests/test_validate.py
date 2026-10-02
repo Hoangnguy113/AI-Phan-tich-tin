@@ -117,3 +117,8 @@ def test_flow_requires_koc_but_script_has_none(doc):
     f = Flow(id="suckhoe-yt-sang", name="x", topic="t", schedule=["0 5 * * *"],
              koc={"enabled": True, "character_id": "KOC-02-THAO"})
     assert any("luồng bật KOC" in e for e in errs(validate_script(doc, f)))
+
+
+def test_diem_qa_nan_bi_loai(doc):
+    doc["qa"]["score"] = float("nan")
+    assert any(i.severity == "error" and i.path == "qa/score" for i in validate_script(doc))

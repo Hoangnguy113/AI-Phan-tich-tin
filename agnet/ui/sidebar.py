@@ -19,7 +19,7 @@ STYLE = """
 
 
 class SidebarShell(QWidget):
-    """Điều hướng trái + trang phải. `add_page` thêm mục; Ctrl+1…9 nhảy nhanh tới từng mục."""
+    """Điều hướng trái + trang phải. `add_page` thêm mục; Ctrl+1…0 nhảy nhanh tới từng mục."""
     page_changed = Signal(int)
 
     def __init__(self, brand: str = "Agnet", subtitle: str = "", footer: str = "", parent=None):
@@ -53,8 +53,8 @@ class SidebarShell(QWidget):
     def add_page(self, title: str, page: QWidget) -> int:
         idx = self.stack.addWidget(page)
         self.nav.addItem(QListWidgetItem(title))
-        if idx < 9:
-            QShortcut(QKeySequence(f"Ctrl+{idx + 1}"), self, activated=lambda i=idx: self.set_current(i))
+        if idx < 10:                                   # Ctrl+1…9 rồi Ctrl+0 cho mục thứ 10
+            QShortcut(QKeySequence(f"Ctrl+{(idx + 1) % 10}"), self, activated=lambda i=idx: self.set_current(i))
         if self.nav.currentRow() < 0:
             self.nav.setCurrentRow(0)
         return idx

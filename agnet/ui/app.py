@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
         self.flows.changed.connect(self.runs.refresh)
         self.general.changed.connect(self.apply_settings)
 
-        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…9: chuyển mục")
+        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…0: chuyển mục")
         for title, page in (("Bảng điều khiển", self.runs), ("Kho kịch bản", self.library),
                             ("Cài đặt luồng", self.flows), ("Gemini", self.gemini),
                             ("Đội agent", self.agents), ("Hợp đồng & tỉ lệ đạt", self.contracts),
@@ -61,8 +61,8 @@ class MainWindow(QMainWindow):
         app = QApplication.instance()
         if app is not None:
             theme.apply_theme(app, s.theme)
+        self.gemini.reload()                                # đặt lại chữ trước, rồi mới dịch
         i18n.apply(self, s.language)
-        self.gemini.reload()
 
 
 def run(flows_path: str | Path = "config/flows.yaml", db_path: str | Path = "agnet.db") -> int:

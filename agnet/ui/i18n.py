@@ -32,7 +32,7 @@ EN: dict[str, str] = {
     "Cài đặt chung": "General settings",
     "Tài khoản Claude": "Claude account",
     "Quản lý luồng kịch bản": "Script flow management",
-    "Ctrl+1…9: chuyển mục": "Ctrl+1…9: switch section",
+    "Ctrl+1…0: chuyển mục": "Ctrl+1…0: switch section",
     "Đội agent": "Agent team",
     "Hợp đồng & tỉ lệ đạt": "Contracts & pass rate",
     # chung

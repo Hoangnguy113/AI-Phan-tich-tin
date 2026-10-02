@@ -126,7 +126,7 @@ class GeminiRunner:
         rec = _Recorder(self.client)
         try:
             outcome = await asyncio.to_thread(run_contract, rec, contract, self._now())
-        except GeminiError as e:                                   # phòng khi run_contract ném thay vì gói
+        except Exception as e:                                     # noqa: BLE001 — run_contract không được làm sập lần chạy
             return await self._fallback(agent, prompt, max_budget_usd, f"{type(e).__name__}: {e}")
         if rec.exc is not None and not outcome.passed:
             return await self._fallback(agent, prompt, max_budget_usd, f"{type(rec.exc).__name__}: {rec.exc}")

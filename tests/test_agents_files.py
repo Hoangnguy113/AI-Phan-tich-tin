@@ -103,3 +103,24 @@ def test_ngay_dang_bat_buoc_o_agent_04_08_09_va_enrich_bat_mac_dinh():
         t = (d / f"{f}.md").read_text(encoding="utf-8")
         assert "YYYY-MM-DD hoặc null" not in t and "BẮT BUỘC" in t, f
     assert Pipeline.__dataclass_fields__["enrich_agents"].default == ("keyword-miner", "competitor-gap-analyst")
+
+
+def test_agent_doc_web_khong_co_bash_va_khong_co_cong_cu_ghi():
+    from agnet.pipeline.agents import AgentError, load_agents
+    specs = load_agents()
+    for n, s in specs.items():
+        assert not ({"Write", "Edit", "MultiEdit", "NotebookEdit"} & set(s.tools)), n
+        assert not ("Bash" in s.tools and {"WebFetch", "WebSearch"} & set(s.tools)), n
+    for f in ("01-trend-scout", "02-video-platform-scout", "03-news-scout", "05-domain-internal-scout"):
+        from pathlib import Path
+        t = (Path(__file__).resolve().parents[1] / ".claude" / "agents" / f"{f}.md").read_text(encoding="utf-8")
+        assert "YYYY-MM-DD hoặc null" not in t and "BẮT BUỘC" in t, f
+
+
+def test_load_agents_tu_choi_agent_co_quyen_ghi_hoac_web_cung_bash(tmp_path):
+    import pytest
+    from agnet.pipeline.agents import AgentError, load_agents
+    for tools in ("Read, Write", "WebFetch, Bash", "Read, Edit, Bash"):
+        (tmp_path / "x.md").write_text(f"---\nname: x\ndescription: d\ntools: {tools}\n---\nbody", encoding="utf-8")
+        with pytest.raises(AgentError):
+            load_agents(tmp_path)
