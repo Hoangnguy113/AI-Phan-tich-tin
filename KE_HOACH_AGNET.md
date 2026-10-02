@@ -1115,7 +1115,7 @@ Mọi điều khiển chỉ **ghi cấu hình**, không ghi đầu ra kịch b�
 
 ## 19. Bước tiếp theo
 
-Trạng thái (02/10/2026, 381 test xanh): **B1–B5 và 10 mục giao diện đã có mã + test; GĐ3 (kiểm kê, rà mã, bảo mật, đối chiếu quy tắc cứng) đã chạy và các lỗi tìm được đã vá (`tests/test_hardening.py`); B6 (chạy thử 1 tin thật) CHƯA làm** vì bám nguồn Gemini đang bị 429.
+Trạng thái (02/10/2026, 405 test xanh): **B1–B5 và 10 mục giao diện đã có mã + test; GĐ3 (kiểm kê, rà mã, bảo mật, đối chiếu quy tắc cứng) đã chạy và các lỗi tìm được đã vá (`tests/test_hardening.py`); B6 (chạy thử 1 tin thật) CHƯA làm** vì bám nguồn Gemini đang bị 429.
 
 | # | Việc | Ai | Trạng thái |
 |---|---|---|---|

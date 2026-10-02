@@ -15,6 +15,7 @@ SKILL_DIR = ROOT / ".claude" / "skills"
 GEMINI_AGENTS = frozenset({"trend-scout", "video-platform-scout", "news-scout", "community-scout",
                            "domain-internal-scout", "keyword-miner", "competitor-gap-analyst"})
 WRITE_TOOLS = frozenset({"Write", "Edit", "MultiEdit", "NotebookEdit"})
+WRITE_TOOLS_L = frozenset(t.lower() for t in WRITE_TOOLS)
 
 
 @dataclass
@@ -46,13 +47,21 @@ def load_agents(directory: Path | str = AGENT_DIR) -> dict[str, AgentSpec]:
         if not m:
             raise AgentError(f"{f.name}: thiếu frontmatter")
         meta = yaml.safe_load(m.group(1))
-        tools = [t.strip() for t in str(meta.get("tools", "")).split(",") if t.strip()]
-        banned = sorted({t for t in tools if t in WRITE_TOOLS})
-        if banned:                                    # quy tắc cứng: agent không có quyền ghi (file do code xuất)
-            raise AgentError(f"{f.name}: agent không được có công cụ ghi {banned}")
-        if str(meta.get("engine", "claude")) == "gemini" and meta["name"] not in GEMINI_AGENTS:
+        raw_tools = meta.get("tools", "")
+        if isinstance(raw_tools, (list, tuple)):
+            raw_tools = ",".join(str(t) for t in raw_tools)
+        tools = [t.strip() for t in str(raw_tools).split(",") if t.strip()]
+        base = {re.sub(r"\(.*$", "", t).strip().lower() for t in tools}      # "Write(*)" → "write", chữ thường
+        writers = sorted(t for t in tools if re.sub(r"\(.*$", "", t).strip().lower() in WRITE_TOOLS_L
+                         or re.search(r"write|edit", t, re.I))
+        if writers:                                   # quy tắc cứng: agent không có quyền ghi (file do code xuất)
+            raise AgentError(f"{f.name}: agent không được có công cụ ghi {writers}")
+        engine = str(meta.get("engine", "claude")).strip().lower()
+        if engine not in ("claude", "gemini"):
+            raise AgentError(f"{f.name}: engine không hợp lệ {engine!r}")
+        if engine == "gemini" and meta["name"] not in GEMINI_AGENTS:
             raise AgentError(f"{f.name}: engine gemini chỉ dành cho agent khảo sát (QA/viết/đạo diễn luôn là Claude)")
-        if "Bash" in tools and {"WebFetch", "WebSearch"} & set(tools):
+        if "bash" in base and {"webfetch", "websearch"} & base:
             raise AgentError(f"{f.name}: agent đọc web không được có Bash (prompt-injection → chạy lệnh)")
         spec = AgentSpec(meta["name"], meta["description"], meta.get("model", "sonnet"), tools,
                          meta.get("skills") or [], m.group(2).strip(),

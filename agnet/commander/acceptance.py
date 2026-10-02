@@ -5,6 +5,7 @@ import re
 import unicodedata
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
+from collections import Counter
 from urllib.parse import urlsplit
 
 from .contract import RAW_ITEM_FIELDS, TaskContract
@@ -72,23 +73,42 @@ def _norm_title(t: str) -> str:
     return " ".join(re.findall(r"[a-z0-9]+", t))
 
 
-def _grounding_index(result) -> tuple[set[str], set[str]]:
-    """(url chuẩn hoá, tên miền) từ nguồn bám. Tiêu đề nguồn dạng tên miền (cách Gemini hay trả) cũng được tính là miền."""
-    urls, hosts = set(), set()
+REDIRECT_HOSTS = frozenset({"vertexaisearch.cloud.google.com", "google.com", "www.google.com", "grounding-api-redirect"})
+
+
+def _grounding_index(result) -> tuple[set[str], Counter]:
+    """(url chuẩn hoá, số "suất" theo tên miền) từ nguồn bám.
+
+    Gemini thường trả URL chuyển hướng (vertexaisearch…) + tên miền thật làm title. Miền chuyển hướng KHÔNG được tính
+    (nếu không mọi URL trên miền đó đều qua). Mỗi nguồn bám chỉ cấp MỘT suất cho miền của nó, nên một nguồn không thể
+    "bảo chứng" hàng loạt URL bịa cùng miền. Vẫn là hàng rào yếu: chưa có dữ liệu groundingMetadata thật để siết hơn."""
+    urls: set[str] = set()
+    slots: Counter = Counter()
     for s in (getattr(result, "sources", None) or []):
         u = (s or {}).get("url", "")
+        redirect = False
         if _valid_url(u):
-            urls.add(_canon_url(u))
-            hosts.add(_host(u))
+            if _host(u) in REDIRECT_HOSTS:
+                redirect = True
+            else:
+                urls.add(_canon_url(u))
         t = ((s or {}).get("title") or "").strip().lower()
-        if re.fullmatch(r"(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+", t):
-            hosts.add(t.removeprefix("www."))
-    return urls, hosts
+        if re.fullmatch(r"(www\.)?[a-z0-9-]+(\.[a-z0-9-]+)+", t) and t not in REDIRECT_HOSTS:
+            slots[t.removeprefix("www.")] += 1
+        elif _valid_url(u) and not redirect:
+            slots[_host(u)] += 1
+    return urls, slots
 
 
-def _is_grounded(url: str, urls: set[str], hosts: set[str]) -> bool:
-    # Khớp URL đầy đủ, hoặc miền trùng một nguồn bám (Gemini hay trả URL chuyển hướng + tên miền làm title).
-    return _canon_url(url) in urls or _host(url) in hosts
+def _is_grounded(url: str, urls: set[str], slots: Counter) -> bool:
+    """Khớp URL đầy đủ (không tốn suất), hoặc miền còn suất từ một nguồn bám (tiêu thụ 1 suất)."""
+    if _canon_url(url) in urls:
+        return True
+    h = _host(url)
+    if slots.get(h, 0) > 0:
+        slots[h] -= 1
+        return True
+    return False
 
 
 def _items_from(raw):

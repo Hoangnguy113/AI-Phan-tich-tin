@@ -99,14 +99,24 @@ def test_thieu_khoa_chay_claude_va_canh_bao(tmp_path):
         raise GeminiAuthError("thiếu GEMINI_API_KEY")
     r = build_runner(S.Settings(gemini_provider="gemini_api"), claude=claude, db=str(tmp_path / "a.db"),
                      api_key="", client_factory=factory)
-    assert r.gemini is None and any("khoá" in w for w in r.warnings)
-    run(r.run(spec(), prompt(), max_budget_usd=1))
+    # mặc định BẮT BUỘC bám nguồn: thiếu khoá thì agent khảo sát bị chặn, Claude KHÔNG làm thay
+    assert any("khoá" in w for w in r.warnings)
+    data = json.loads(run(r.run(spec(), prompt(), max_budget_usd=1)).text)
+    assert claude.calls == [] and data["items"] == [] and data["reason"].startswith("grounding_required")
+    # tắt bắt buộc thì mới chuyển sang Claude như cũ
+    r2 = build_runner(S.Settings(gemini_provider="gemini_api", gemini_require_grounding=False), claude=claude,
+                      db=str(tmp_path / "b.db"), api_key="", client_factory=factory)
+    assert r2.gemini is None
+    run(r2.run(spec(), prompt(), max_budget_usd=1))
     assert claude.calls == ["trend-scout"]
 
 
 def test_provider_cli_chua_ho_tro_chay_claude(tmp_path):
-    r = build_runner(S.Settings(gemini_provider="gemini_cli"), claude=ClaudeStub(), db=str(tmp_path / "a.db"))
+    r = build_runner(S.Settings(gemini_provider="gemini_cli", gemini_require_grounding=False), claude=ClaudeStub(),
+                     db=str(tmp_path / "a.db"))
     assert r.gemini is None and r.warnings
+    r = build_runner(S.Settings(gemini_provider="gemini_cli"), claude=ClaudeStub(), db=str(tmp_path / "b.db"))
+    assert r.gemini is not None and r.warnings          # mặc định: chặn, không để Claude làm thay
 
 
 # ---- fallback ----------------------------------------------------------------------------------------

@@ -113,7 +113,9 @@ def missing_reference_images(char: dict, refs_root: Path) -> list[str]:
 # ---- kiểm tra --------------------------------------------------------------
 _ZERO_WIDTH = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad"))
 _PROFESSIONS = ("bac si", "luat su", "duoc si", "doctor", "physician", "lawyer", "attorney", "surgeon")
-_EXTRA_SEXUAL = ("nude", "naked", "topless", "nsfw", "erotic", "sexual", "boobs", "bra size")
+_EXTRA_SEXUAL = ("nude", "naked", "topless", "nsfw", "erotic", "sexual", "sexily", "sensual", "skimpy", "underwear",
+                 "boobs", "bra size")
+_MEASURE = re.compile(r"\b\d{2,3}\s*[-/x×,.\s]\s*\d{2,3}\s*[-/x×,.\s]\s*\d{2,3}\b")
 _IMPERSONATE_PLAIN = re.compile(            # bản không dấu: phủ định cũng viết không dấu
     r"(?<!khong )(?<!khong phai )(?<!chang phai )(?<!not a )(?<!not )(?<!no )\b(bac si|luat su|duoc si|doctor|physician|lawyer|attorney|surgeon)\b")
 _TITLE = re.compile(r"\b(?:dr|bs|ths\.?bs|ts\.?bs|md)\b\.?", re.I)
@@ -136,12 +138,17 @@ def _obfuscated(word: str, text: str) -> bool:
 
 
 def check_text(label: str, value: str) -> None:
-    for v in (value, _plain(value)):
+    plain0 = _plain(value)
+    spaced = re.sub(r"[\s\-_]+", " ", plain0)          # "hyper  detailed", "8 K"
+    joined = re.sub(r"[\s\-_]+", "-", plain0)          # "hyper-detailed", "8-k"
+    for v in (value, plain0, spaced, joined, re.sub(r"[\s\-_]+", "", plain0)):
         try:
             mp._scan_banned(label, v)
         except mp.PromptError as e:
             raise KocError(str(e)) from e
-    plain = _plain(value)
+    plain = plain0
+    if _MEASURE.search(plain):
+        raise KocError(f"{label}: không được mô tả số đo cơ thể (mục 17.11)")
     if _IMPERSONATE.search(value) or _IMPERSONATE_PLAIN.search(plain) or _TITLE.search(plain):
         raise KocError(f"{label}: không được mạo danh bác sĩ/luật sư (mục 17.11)")
     if any(_obfuscated(w, plain) for w in _PROFESSIONS):

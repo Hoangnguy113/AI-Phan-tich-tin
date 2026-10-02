@@ -140,7 +140,8 @@ def extract_json(text: str):
 class GeminiClient:
     def __init__(self, api_key: str, *, settings: Settings | None = None, cache_path: str | Path | None = None,
                  transport: Transport | None = None, clock: Callable[[], float] = time.time,
-                 sleep: Callable[[float], None] = time.sleep, timeout: float = 120.0, server_retries: int = 2):
+                 sleep: Callable[[float], None] = time.sleep, timeout: float = 60.0, server_retries: int = 1,
+                 max_total_s: float = 300.0):
         if not api_key:
             raise GeminiAuthError("thiếu GEMINI_API_KEY")
         self._key = api_key
@@ -148,7 +149,7 @@ class GeminiClient:
         self.cache_path = Path(cache_path or DEFAULT_CACHE)
         self._tx = transport or urllib_transport
         self._now, self._sleep = clock, sleep
-        self.timeout, self.server_retries = timeout, server_retries
+        self.timeout, self.server_retries, self.max_total_s = timeout, server_retries, max_total_s
         self._ladder: list[ModelInfo] | None = None
         self._lock = threading.RLock()                      # GeminiRunner gọi từ nhiều luồng (asyncio.to_thread)
         self._cool: dict[str, float] = {}                  # model -> thời điểm được dùng lại
@@ -259,7 +260,11 @@ class GeminiClient:
             search, body = False, json.dumps(plain).encode("utf-8")
 
         attempts: list[dict] = []
-        for idx, m in enumerate(self.ladder()):             # 429 → model đó nghỉ, hạ xuống model thấp hơn
+        deadline = self._now() + self.max_total_s            # hạn chót cho cả thang: luồng nền không được chạy vô hạn
+        for idx, m in enumerate(self.ladder()):
+            if self._now() > deadline:
+                attempts.append({"model": m.name, "outcome": "deadline"})
+                break             # 429 → model đó nghỉ, hạ xuống model thấp hơn
             if search and not m.grounding:                  # Gemma không có Google Search → bỏ qua khi cần bám nguồn
                 continue
             if max(self._cool.get(self._ck(m, search), 0), self._cool.get(m.name, 0)) > self._now():
@@ -360,7 +365,8 @@ class GeminiClient:
         except (GeminiError, ValueError) as e:
             rep["key"], rep["note"] = "error", f"{type(e).__name__}: {e}"[:200]
             return rep
-        self._cool.clear()                                  # người dùng bấm kiểm tra = muốn thử lại thật, không bị kẹt cooldown cũ
+        with self._lock:
+            self._cool.clear()                              # người dùng bấm kiểm tra = muốn thử lại thật, không bị kẹt cooldown cũ
         self._cache["fetched_at"], self._cache["models"] = self._now(), names
         self._save_cache()
         self._ladder = None

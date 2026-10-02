@@ -29,11 +29,9 @@ def _lines(p: Path) -> list[str]:
 def _write(p: Path, lines: list[str]) -> None:
     p.parent.mkdir(parents=True, exist_ok=True)
     tmp = p.with_name(p.name + ".tmp")
-    tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    try:
-        os.chmod(tmp, 0o600)                       # chứa khoá: chỉ chủ sở hữu đọc được
-    except OSError:
-        pass
+    fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)   # 0600 ngay lúc tạo, không có khoảng hở
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
     os.replace(tmp, p)                             # nguyên tử: lỗi giữa chừng không làm cụt .env
 
 

@@ -163,6 +163,18 @@ class GeminiRunner:
         return out
 
 
+class _BlockedGemini:
+    """Thay GeminiRunner khi không dựng được client mà vẫn bắt buộc bám nguồn: trả rỗng kèm lý do, không gọi Claude."""
+
+    def __init__(self, why: str):
+        self.why, self.warnings = why, []
+
+    async def run(self, agent, prompt, *, max_budget_usd):
+        msg = f"grounding_required: {self.why}"
+        self.warnings.append(f"{agent.name}: {msg}")
+        return AgentResult(json.dumps({"items": [], "reason": msg}, ensure_ascii=False))
+
+
 class RoutingRunner:
     """Agent engine=gemini -> GeminiRunner (nếu có); còn lại -> Claude."""
 
@@ -192,10 +204,18 @@ def build_runner(settings: app_settings.Settings | None = None, *, claude: Agent
     router = RoutingRunner(base)
     if s.gemini_provider == "off":
         return router
-    if s.gemini_provider != "gemini_api":
-        router.notes.append(f"gemini_provider={s.gemini_provider} chưa được hỗ trợ trong pipeline — mọi agent chạy Claude")
+
+    def blocked(why: str) -> RoutingRunner:
+        """Bắt buộc bám nguồn: không dựng được Gemini thì agent khảo sát bị CHẶN, không để Claude làm thay."""
+        if s.gemini_require_grounding:
+            router.notes.append(f"{why} — agent khảo sát bị chặn (gemini_require_grounding), Claude KHÔNG làm thay")
+            router.gemini = _BlockedGemini(why)
+        else:
+            router.notes.append(f"{why} — mọi agent chạy Claude")
         log.warning(router.notes[-1])
         return router
+    if s.gemini_provider != "gemini_api":
+        return blocked(f"gemini_provider={s.gemini_provider} chưa được hỗ trợ trong pipeline")
     key = api_key if api_key is not None else os.environ.get("GEMINI_API_KEY", "")
     try:
         if client_factory is not None:
@@ -204,9 +224,7 @@ def build_runner(settings: app_settings.Settings | None = None, *, claude: Agent
             from ..gemini.client import GeminiClient
             client = GeminiClient(key, settings=s)
     except GeminiAuthError as e:
-        router.notes.append(f"thiếu khoá Gemini ({e}) — mọi agent chạy Claude")
-        log.warning(router.notes[-1])
-        return router
+        return blocked(f"thiếu khoá Gemini ({e})")
     router.gemini = GeminiRunner(client, base, store=store or ComplianceStore(db),
                                  require_grounding=s.gemini_require_grounding)
     return router

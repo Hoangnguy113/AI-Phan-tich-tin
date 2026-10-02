@@ -41,7 +41,7 @@ def read_survey(raw) -> SurveyResult:
         return SurveyResult(reason="đầu ra khảo sát không phải mảng/đối tượng JSON")
     if lst is None:
         return SurveyResult(reason=reason or "đầu ra khảo sát không có khoá items")
-    items = [i for i in lst if isinstance(i, dict)]
+    items = [i for i in lst if isinstance(i, dict) and any(str(i.get(k) or "").strip() for k in ("title", "url"))]
     return SurveyResult(items=items, reason=reason, dropped=len(lst) - len(items))
 
 

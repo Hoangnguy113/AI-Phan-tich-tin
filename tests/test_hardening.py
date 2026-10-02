@@ -141,3 +141,78 @@ def test_env_store_ghi_nguyen_tu_va_quyen_600(tmp_path):
 def test_log_che_khoa_gemini():
     from agnet.logging_setup import SECRET_KEYS
     assert "GEMINI_API_KEY" in SECRET_KEYS
+
+
+# ---- đợt phản biện ---------------------------------------------------------------------------------------
+def _lad_agent(tmp_path, front):
+    (tmp_path / "q.md").write_text(f"---\nname: editor-in-chief\ndescription: d\n{front}\n---\nx", encoding="utf-8")
+    return load_agents(tmp_path)
+
+
+@pytest.mark.parametrize("front", ["engine: Gemini\ntools: Read", "engine: '  gemini '\ntools: Read",
+                                   "engine: gpt\ntools: Read", "tools: [Read, Write]", "tools: Read, write",
+                                   "tools: Read, Write(*)", "tools: mcp__fs__write_file", "tools: Edit(src/**)",
+                                   "tools: WebFetch, Bash(*)"])
+def test_load_agents_khong_bi_lach_bang_chu_hoa_danh_sach_hay_ngoac(tmp_path, front):
+    with pytest.raises(AgentError):
+        _lad_agent(tmp_path, front)
+
+
+def test_nghiem_thu_url_chuyen_huong_khong_bao_chung_url_bia():
+    from datetime import datetime, timezone
+    from types import SimpleNamespace
+    from agnet.commander import TaskContract, accept
+    now = datetime(2026, 10, 2, 12, tzinfo=timezone.utc)
+    c = TaskContract(agent="trend-scout", flow_id="f", goal="g", min_items=1, max_age_hours=48)
+    mk_item = lambda u: {"title": "t " + u[-3:], "url": u, "source": "news", "published_at": "2026-10-02", "snippet": "s"}
+    # nguồn bám là URL chuyển hướng + title "reuters.com": URL bịa trên miền chuyển hướng KHÔNG qua
+    res = SimpleNamespace(sources=[{"url": "https://vertexaisearch.cloud.google.com/grounding-api-redirect/x",
+                                    "title": "reuters.com"}])
+    r = accept([mk_item("https://vertexaisearch.cloud.google.com/fake/abc")], c, res, now)
+    assert not r.accepted
+    # một nguồn chỉ cấp 1 suất cho miền reuters.com: mục thứ hai cùng miền bị loại
+    r = accept([mk_item("https://www.reuters.com/a1"), mk_item("https://www.reuters.com/b2")], c, res, now)
+    assert len(r.accepted) == 1 and r.rejected[0].reason == "not_grounded"
+
+
+def test_survey_bo_muc_rong():
+    from agnet.pipeline.survey import read_survey
+    assert read_survey({"items": [{}, {"title": "a"}]}).items == [{"title": "a"}]
+
+
+def test_gemini_co_han_chot_tong_cho_ca_thang(tmp_path):
+    from agnet.gemini import AllModelsExhausted
+    t = [1e6]
+    fake = Fake({m: [(503, b"")] * 9 for m in ("gemini-3.8-pro", "gemini-3.7-pro", "gemini-3.8-flash",
+                                               "gemini-3.8-flash-lite")})
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: t[0],
+                     sleep=lambda s: t.__setitem__(0, t[0] + 100), max_total_s=150)
+    with pytest.raises(AllModelsExhausted) as e:
+        c.generate("x", search=False)
+    assert any(a["outcome"] == "deadline" for a in e.value.attempts)
+
+
+@pytest.mark.parametrize("bad", ["ｐｅｒｆｅｃｔ", "hyper  detailed skin", "hyper-detailed", "8 K", "ultra realistic",
+                                 "90 60 90", "sexily posed", "sensual", "skimpy outfit", "underwear"])
+def test_koc_chan_them_cach_lach(bad):
+    from agnet.ui.page_koc import KocError, check_text
+    with pytest.raises(KocError):
+        check_text("defaults.setting", bad)
+
+
+def test_env_tao_tep_tam_0600_ngay_tu_dau(tmp_path, monkeypatch):
+    import stat
+    from agnet.ui import env_store
+    seen = []
+    real = os.replace
+    monkeypatch.setattr(os, "replace", lambda a, b: (seen.append(stat.S_IMODE(os.stat(a).st_mode)), real(a, b))[1])
+    env_store.set_key(tmp_path / ".env", "GEMINI_API_KEY", "k" * 20)
+    assert seen == [0o600]
+
+
+def test_loi_ghi_tep_mot_kich_ban_khong_sap_ca_lan_chay(tmp_path, monkeypatch):
+    from agnet.pipeline import export
+    monkeypatch.setattr(export, "write_script_folder", lambda *a, **k: (_ for _ in ()).throw(OSError("đĩa đầy")))
+    p = Pipeline(_flow(), load_agents(), FakeRunner(), Store(tmp_path / "t.db"), date(2026, 10, 2), tmp_path / "o")
+    res = asyncio.run(p.run())
+    assert not res["status"].startswith("lỗi:")

@@ -108,10 +108,10 @@ def test_khoa_sai_khong_ha_bac(tmp_path):
 
 
 def test_loi_may_chu_thu_lai_roi_ha_bac(tmp_path):
-    c, fake, t = mk(tmp_path, {"gemini-3.8-pro": [(503, b""), (503, b""), (503, b"")], "gemini-3.7-pro": ok()})
+    c, fake, t = mk(tmp_path, {"gemini-3.8-pro": [(503, b""), (503, b"")], "gemini-3.7-pro": ok()})
     r = c.generate("x")
-    assert r.model == "gemini-3.7-pro" and fake.posts().count("gemini-3.8-pro") == 3
-    assert t[0] == 1_000_000.0 + 1 + 2          # lùi dần 1s, 2s
+    assert r.model == "gemini-3.7-pro" and fake.posts().count("gemini-3.8-pro") == 2    # 1 lần thử lại
+    assert t[0] == 1_000_000.0 + 1
 
 
 def test_cache_danh_sach_dung_lai_va_het_han_thi_tai_lai(tmp_path):

@@ -206,9 +206,15 @@ class Pipeline:
                 if outcome.verdict == "pass" and passed < self.flow.daily_quota:
                     passed += 1
                     index += 1
-                    outcome.folder = str(export.write_script_folder(doc, md, self.out_root, day, index))
-                    if doc.get("koc", {}).get("enabled"):
-                        write_koc_prompts(doc, outcome.folder)
+                    try:
+                        outcome.folder = str(export.write_script_folder(doc, md, self.out_root, day, index))
+                        if doc.get("koc", {}).get("enabled"):
+                            write_koc_prompts(doc, outcome.folder)
+                    except OSError as e:                  # lỗi ghi một kịch bản không được sập cả lần chạy
+                        passed -= 1
+                        index -= 1
+                        outcome.verdict, outcome.note = "error", f"không ghi được tệp: {e}"[:200]
+                        self.store.release_topic(self.flow.id, story["title"], today=self.today)
                 else:
                     if outcome.verdict == "pass":
                         outcome.verdict, outcome.note = "reject", "vượt quota"
