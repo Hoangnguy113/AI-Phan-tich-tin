@@ -962,132 +962,166 @@ Thêm vào **Web UI** (mục 12): màn hình **Quản lý nhân vật** — xem/
 
 ---
 
-## 18. KIẾN TRÚC v1.2 — Claude chỉ huy, Gemini thực thi, 20 tin/ngày
+## 18. KIẾN TRÚC v1.3 — Claude chỉ huy, Gemini thực thi việc không cần nguồn, 20 tin/ngày
 
-> Bổ sung 02/10/2026. Mục này thay đổi mục 4 (đội hình), mục 6 (sản lượng) và mục 12 (giao diện). Phần nào đã kiểm chứng và phần nào chưa được ghi rõ ở 18.9.
+> Cập nhật 02/10/2026 (v1.2 → v1.3). Mục này thay đổi mục 4 (đội hình), mục 6 (sản lượng) và mục 12 (giao diện). v1.2 giả định Gemini làm được khảo sát có bám nguồn; **phép đo thật ở 18.2 cho thấy giả định đó không đúng ở gói hiện tại**, nên 18.3 đổi thành hai phương án chờ người dùng quyết. Phần nào đã/chưa kiểm chứng ghi rõ ở 18.11.
 
 ### 18.1 Quyết định
 
-| Hạng mục | v1.1 | v1.2 |
+| Hạng mục | v1.1 | v1.3 |
 |---|---|---|
-| Sản lượng | 10 kịch bản/luồng/ngày | **20 tin/ngày** (người dùng đặt trong giao diện, 1–50) |
-| Khảo sát thị trường, tìm kiếm mạng | Claude (WebSearch/WebFetch) | **Gemini** có bám tìm kiếm Google (grounding) |
-| Phán đoán, viết, đạo diễn, QA, khóa nhân vật | Claude | Claude (**tổng chỉ huy**, không đổi) |
+| Sản lượng | 10 kịch bản/luồng/ngày | **20 tin/ngày** (đặt trong giao diện, 1–50) |
+| Khảo sát thị trường, tìm kiếm mạng | Claude (WebSearch/WebFetch) | **CHỜ NGƯỜI DÙNG CHỌN** (18.3): (a) Gemini bám nguồn Google nếu bật thanh toán, hoặc (b) giữ Claude WebSearch |
+| Phân loại, gom cụm, tóm tắt, viết nháp (không cần nguồn) | Claude | Gemini được phép làm (đã đo gọi thường chạy 200) |
+| Phán đoán, viết chính, đạo diễn, QA, khóa nhân vật | Claude | Claude (**tổng chỉ huy**, không đổi) |
 | Số liệu, đếm từ, schema, chống trùng, ngân sách | Code Python | Code Python (không đổi) |
 | Xác thực Claude | API key | **Tài khoản Claude đã đăng nhập** (đã kiểm chứng 01/10/2026) |
-| Xác thực Gemini | — | **Khóa Google AI Studio** (đã chốt 02/10/2026); danh sách model tự cập nhật, hết định mức thì hạ bậc (18.4) |
-| Giao diện | Dòng lệnh | Ứng dụng desktop PySide6: ngôn ngữ, chủ đề, giờ chạy, số agent song song, số tin/ngày |
+| Xác thực Gemini | — | **Khóa Google AI Studio** (`GEMINI_API_KEY` trong `.env`); danh sách model tự cập nhật, hết định mức thì hạ bậc (18.4) |
+| Giao diện | Dòng lệnh | Ứng dụng desktop PySide6, thanh điều hướng trái (18.9) |
 
-### 18.2 Phân vai
+### 18.2 Kết quả đo THẬT với khoá Google AI Studio — 02/10/2026
 
-```
-                      ┌──────────────────────────────────────┐
-                      │ CLAUDE — TỔNG CHỈ HUY                │
-                      │ giao nhiệm vụ · nghiệm thu · quyết   │
-                      └───────┬───────────────────┬──────────┘
-        Hợp đồng nhiệm vụ     │                   │   phán đoán
-        (schema + tối thiểu)  ▼                   ▼
-        ┌─────────────────────────┐     ┌───────────────────────────────┐
-        │ GEMINI — THỰC THI       │     │ CLAUDE — SÁNG TẠO & KIỂM SOÁT │
-        │ Trend/Video/News/       │     │ Gom cụm · chấm điểm · chiến   │
-        │ Community/Domain scout  │     │ lược · viết · đạo diễn · tiêu │
-        │ Keyword · Gap analyst   │     │ đề · khóa nhân vật KOC · QA   │
-        └───────────┬─────────────┘     └──────────────┬────────────────┘
-                    │ RawItem + nguồn                  │
-                    ▼                                  ▼
-        ┌──────────────────────────────────────────────────────────────┐
-        │ CODE PYTHON — NGHIỆM THU CỨNG                                │
-        │ kiểm schema · URL · tuổi tin · trùng 30 ngày · ngân sách     │
-        └──────────────────────────────────────────────────────────────┘
-```
+Đây là lần đầu gọi Gemini thật. Khoá nằm trong `.env`, không ghi vào tài liệu hay log.
 
-| Nhóm | Agent | Chạy bằng |
+| Phép đo | Kết quả |
+|---|---|
+| Liệt kê model | Được **44 model** |
+| `gemini-3.8-flash`, gọi thường (không công cụ) | **200** — dùng được |
+| `gemini-2.5-pro` / `2.5-flash` / `2.5-flash-lite` | **404** "no longer available to new users" |
+| `gemini-3.1-pro-preview` | **429**, `limit: 0` (gói miễn phí không có hạn mức bậc pro này) |
+| `google_search` (bám nguồn) trên 3.8-flash, 3.5-flash, 3.5-flash-lite, 3.1-flash-lite, 3-flash-preview | **429 trên TẤT CẢ**, trong khi cùng model gọi thường vẫn 200 |
+| Lỗi tạm | **503** "high demand" thoáng qua — thử lại là qua |
+
+**Kết luận đo:** 429 của `google_search` xảy ra trên mọi model nên đó là **hạn mức của công cụ tìm kiếm** (gói miễn phí), **không phải hạn mức của model**. Hạ xuống model thấp hơn không giải quyết được.
+
+**Hệ quả kiến trúc:** ở gói hiện tại Gemini **không thể là nguồn dữ liệu có bằng chứng** — không có bám nguồn thì không có URL/grounding metadata để nghiệm thu (18.5), còn để Gemini "nhớ" tin tức từ trọng số mô hình thì vi phạm quy tắc cứng số 1 (không bịa số liệu). Mục 18.2 của v1.2 (bảng 7 agent khảo sát chạy bằng Gemini) **tạm treo** cho tới khi người dùng chọn ở 18.3.
+
+**Client đã xử lý các tình huống trên** (`agnet/gemini/client.py`, `ladder.py`; kiểm bằng transport giả, nay có thêm một lượt đo thật):
+
+| Tình huống | Cách xử lý |
+|---|---|
+| Công cụ bám nguồn bị 429 | `GroundingUnavailable` — tách khỏi lỗi model; **nghỉ riêng cho công cụ** (khoá `*search`), không làm hỏng model đang dùng được cho gọi thường |
+| 429 `limit: 0` | Model nghỉ **24 giờ** (không hạn mức thì chờ phút cũng vô ích) |
+| 404 "no longer available" | Model nghỉ **24 giờ** và bị bỏ khỏi thang |
+| 429 có `retry_after` / hết hạn mức ngày | Nghỉ theo `retry_after` / tới lúc Google đặt lại |
+| 503 / lỗi máy chủ | Thử lại có giới hạn (`server_retries`) |
+| `probe()` | Đo nhanh: gọi thường và gọi bám nguồn riêng rẽ, trả bảng model/công cụ nào dùng được; dùng khi đổi khoá hoặc đổi gói, và hiển thị trên giao diện (18.9) |
+| Hết cả thang / khoá sai | Chuyển lượt sang Claude, ghi cảnh báo, pipeline không dừng |
+
+### 18.3 Quyết định cần người dùng
+
+| Phương án | Nội dung | Được | Mất |
+|---|---|---|---|
+| **(a) Bật thanh toán / hạn mức tìm kiếm Google** | Nâng gói Google AI Studio để `google_search` có hạn mức | Giữ nguyên thiết kế v1.2: 7 scout chạy Gemini có bám nguồn, nhẹ gánh hạn mức Claude | Phát sinh chi phí Google (chưa đo: số lượt tìm kiếm/ngày × giá); phải chạy lại `probe()` để chắc 429 đã hết |
+| **(b) Giữ khảo sát bằng Claude WebSearch** | Scout vẫn là agent Claude như v1.1; Gemini chỉ làm việc **không cần nguồn**: phân loại, gom cụm, tóm tắt, viết nháp | Không tốn thêm; không phụ thuộc hạn mức tìm kiếm; hợp quy tắc cứng | Tiêu hao hạn mức gói Claude nhiều hơn (chưa biết có chịu nổi 20 tin/ngày — 18.11) |
+
+Trong lúc chờ quyết định, **mặc định thi hành là (b)** vì không cần thay đổi gì và không vi phạm quy tắc cứng. Chuyển sang (a) chỉ là đổi `engine` của agent trong giao diện "Đội agent" (18.9) sau khi `probe()` xác nhận bám nguồn chạy được.
+
+### 18.4 Xác thực & thang model Gemini
+
+- **Claude**: tài khoản đã đăng nhập (`claude auth login`). Khoá API được ưu tiên hơn tài khoản, nên giao diện cảnh báo khi còn `ANTHROPIC_API_KEY` và loại khoá khỏi tiến trình con.
+- **Gemini**: khoá Google AI Studio, giao diện luôn che. Đã có khoá và đã gọi thật (18.2).
+  - **Tự cập nhật danh sách model**: gọi API liệt kê (mặc định 24 giờ, đặt 1–168 giờ), phân tích tên → họ, phiên bản, bậc (`pro` > `flash` > `flash-lite`), xếp **thang model**. Bản ghi nhớ `config/gemini_models.json` (không chứa khoá).
+  - **Hết định mức thì xuống bậc thấp hơn** (429): hết phiên bản này sang phiên bản thấp hơn cùng bậc rồi mới sang bậc thấp hơn. Bản preview chỉ dùng khi không còn bản ổn định. Tắt được bằng `gemini_fallback`.
+  - Quan sát thật: bậc `pro` trong gói miễn phí gần như không dùng được (`limit: 0`), nên thực tế thang bắt đầu từ `flash`.
+  - Hết cả thang hoặc khoá sai: lượt đó chuyển sang Claude và ghi cảnh báo.
+
+### 18.5 Hợp đồng nhiệm vụ — chỉ áp dụng cho việc Gemini mang dữ liệu có nguồn về
+
+Chỉ huy không "nhắc khéo" mà **ràng buộc bằng hợp đồng, nghiệm thu bằng code**. Phần này chỉ có hiệu lực khi chọn phương án (a); với việc không cần nguồn (phân loại, gom cụm…) chỉ áp dụng kiểm schema và số mục tối thiểu.
+
+1. **Giao**: `TaskContract` gồm mục tiêu, luồng, schema JSON đầu ra, **số mục tối thiểu**, nguồn bắt buộc quét, thời hạn.
+2. **Nộp**: JSON đúng schema; mỗi mục có `title`, `url`, `source`, `published_at`, `snippet` và bằng chứng bám nguồn.
+3. **Nghiệm thu bằng code**: đúng schema · `url` hợp lệ và có trong metadata bám nguồn · tuổi tin trong cửa sổ · không trùng · đủ số mục tối thiểu · số liệu có nguồn. Mục thiếu bằng chứng bị **loại**, không "ước lượng cho đủ".
+4. **Trả lại**: không đạt thì gửi lại **một lần** kèm danh sách lỗi cụ thể; vẫn không đạt thì ghi `compliance=fail`, loại nguồn đó khỏi lượt chạy và báo trên giao diện. Claude không tự bịa dữ liệu thay Gemini.
+5. **Chỉ số**: tỉ lệ đạt hợp đồng theo từng agent Gemini, hiển thị ở màn "Hợp đồng & tỉ lệ đạt" (18.9).
+
+### 18.6 Sản lượng 20 tin/ngày
+
+- Lấy dư theo mục 6: thu 400–800 RawItem → gom 80–120 Story → chấm điểm → chọn **30** đề tài (20 × 1,5) → viết 30 → QA đạt ≥ 20. Ngưỡng QA ≥ 8 **không hạ**; thiếu thì lấy đề tài dự phòng.
+- Bảng thời lượng khi quota = 20: `{3-5: 6, 8-12: 10, 15-20: 4}`; giao diện tự chia lại, tổng luôn bằng quota.
+- `run_timeout_min` nâng 180 → **240** cho luồng 20 tin; lịch đặt sớm hơn giờ cần 3 giờ.
+- `max_cost_usd_per_day` là chốt chặn cứng. Với tài khoản đăng ký, chi phí chỉ là số quy đổi nhưng **hạn mức gói vẫn bị tiêu hao**.
+
+### 18.7 Song song & giới hạn thực tế
+
+- Số agent song song đặt trong giao diện (mặc định 3, tối đa 8) → `Pipeline.concurrency`.
+- **Phát hiện 02/10/2026**: nhiều tiến trình Claude Code dùng chung một lần đăng nhập có thể đua nhau làm mới token (`Failed to refresh OAuth token: another Claude Code process is refreshing it`); lần chạy thật đầu chết ở agent đầu tiên. Đối sách bắt buộc: **thử lại lùi dần** cho lỗi tạm và **khởi động ấm** bằng một lượt gọi đơn lẻ trước khi bung song song (việc của B4).
+- Đo 01/10/2026: mỗi lượt gọi tốn 61.517 token đầu vào nếu không tắt nạp cấu hình máy; đã vá còn ~7.000 (`SdkRunner`).
+
+### 18.8 Mô hình thi công 4 giai đoạn
+
+Mỗi agent **sở hữu một tập tệp riêng** để không ghi đè nhau và **không commit**; chỉ **tổng chỉ huy** commit sau khi giai đoạn xanh test.
+
+| Giai đoạn | Việc | Chạy |
 |---|---|---|
-| Khảo sát & tìm kiếm | 01 trend-scout · 02 video-platform-scout · 03 news-scout · 04 community-scout · 05 domain-internal-scout · 08 keyword-miner · 09 competitor-gap-analyst | **Gemini** |
-| Nghiên cứu sâu | 11 deep-researcher (thu thập thô bằng Gemini, **Claude tổng hợp**) · 12 fact-checker (Gemini tìm nguồn thứ hai, **Claude kết luận**) | Gemini + Claude |
-| Phán đoán & sáng tạo | 06 dedup-cluster · 07 trend-scorer · 10 content-strategist · 13 script-writer · 14 director · 15 hook-packaging · 17 koc-character-director · 16 editor-in-chief | **Claude** |
+| **GĐ1 — Nền** | B2 hợp đồng & nghiệm thu · B3 agent Gemini · UI-Gemini (mục Gemini trên giao diện) · Kế hoạch (tài liệu này) | **Song song**, tập tệp rời nhau |
+| **GĐ2 — Nối** | B4 nối pipeline (định tuyến theo `engine`, `concurrency`, thử lại OAuth, khởi động ấm, quota 20) + các màn hình còn lại (Đội agent, Hợp đồng, KOC, Chi phí) | B4 trước (cần giao diện hàm của B1–B2), màn hình song song |
+| **GĐ3 — Kiểm tra** | Nhóm kiểm: (1) kiểm kê tệp, (2) chạy test, (3) rà khoá/bảo mật, (4) đối chiếu quy tắc cứng trong CLAUDE.md | **Song song**, chỉ đọc (không sửa) |
+| **GĐ4 — Đánh giá** | Agent **tổng đánh giá** gộp báo cáo GĐ3 + agent **phản biện độc lập** (không thấy kết luận của tổng, tự tìm lỗi) | Tuần tự rồi đối chiếu; bất đồng thì ghi cả hai ý kiến cho người dùng |
 
-Fact-checker không được để Gemini kết luận một mình: Gemini chỉ **mang nguồn về**, Claude phán xét đúng/sai (quy tắc cứng số 4 trong CLAUDE.md).
+| Luồng | Phạm vi | Tệp sở hữu | Trạng thái |
+|---|---|---|---|
+| B1 Gemini client | `GeminiClient`, thang model, bám nguồn, `probe()`, transport giả | `agnet/gemini/*`, `tests/test_gemini_*` | **Xong** + đã đo thật (18.2) |
+| B2 Hợp đồng & nghiệm thu | `TaskContract`, nghiệm thu bằng code, đo `compliance` | `agnet/commander/*`, `tests/test_commander_*` | Đang làm — sẽ cập nhật khi agent báo |
+| B3 Agent Gemini | khai `engine` cho 7 agent, viết lại prompt theo hợp đồng; **phụ thuộc quyết định 18.3** | `.claude/agents/01–05,08,09`, `tests/test_agents_files.py` | Đang làm — sẽ cập nhật khi agent báo |
+| UI-Gemini | Mục Gemini trên giao diện: trạng thái khoá, thang model, `probe()`, nghỉ hạn mức | `agnet/ui/page_gemini.py` (+ nối trong `app.py`) | Đang làm |
+| Kế hoạch | Mục 18–19 tài liệu | `KE_HOACH_AGNET.md` | Đang làm (bản này) |
+| B4 Nối pipeline | định tuyến `engine`, `concurrency`, thử lại OAuth, khởi động ấm, quota 20 | `agnet/pipeline/*`, `agnet/runner.py` | Kế hoạch (chờ B2) |
+| B5 Màn hình còn lại | Đội agent, Hợp đồng & tỉ lệ đạt, Nhân vật KOC, Chi phí & hạn mức | `agnet/ui/page_agents.py`, `page_contracts.py`, `page_koc.py`, `page_cost.py` | Kế hoạch |
+| B6 Kiểm chứng | GĐ3–GĐ4; chạy thử 1 tin thật, báo cáo chi phí & agent chậm | `tests/*`, báo cáo | Kế hoạch |
 
-### 18.3 Hợp đồng nhiệm vụ — bắt Gemini phải làm đúng việc
+### 18.9 Bản đồ giao diện (PySide6, thanh điều hướng trái)
 
-Chỉ huy không "nhắc khéo" mà **ràng buộc bằng hợp đồng, nghiệm thu bằng code**:
+Thanh trái (`agnet/ui/sidebar.py`, rộng 210 px, phím nhanh Ctrl+1…9). Hiện **5 mục**, thứ tự đăng ký trong `agnet/ui/app.py`; các mục mới thêm vào bằng `add_page`.
 
-1. **Giao**: mỗi lượt gọi Gemini kèm `TaskContract` gồm mục tiêu, luồng, schema JSON đầu ra, **số mục tối thiểu**, các nguồn bắt buộc phải quét, thời hạn.
-2. **Nộp**: Gemini phải trả JSON đúng schema; mỗi mục có `title`, `url`, `source`, `published_at`, `snippet` và bằng chứng bám nguồn (grounding).
-3. **Nghiệm thu bằng code** (không giao cho LLM): đúng schema · `url` hợp lệ và có trong metadata bám nguồn của Gemini · tuổi tin trong cửa sổ cho phép · không trùng · đủ số mục tối thiểu · số liệu có kèm nguồn. Mục thiếu bằng chứng bị **loại**, không "ước lượng cho đủ" (quy tắc cứng số 1).
-4. **Trả lại**: không đạt thì gửi lại **một lần** kèm danh sách lỗi cụ thể. Vẫn không đạt thì ghi `compliance=fail`, loại nguồn đó khỏi lượt chạy và báo trên giao diện. **Claude không tự bịa dữ liệu thay Gemini.**
-5. **Chỉ số**: tỉ lệ đạt hợp đồng theo từng agent Gemini, hiển thị trên bảng điều khiển.
+| # | Mục | Tình trạng | Điều khiển có thể sửa | Lưu ở |
+|---|---|---|---|---|
+| 1 | Bảng điều khiển (`page_runs.py`) | Hiện có | Chạy luồng, chạy bù, xem lịch sử & chi phí, điều khiển tiến trình | Chỉ đọc `agnet.db`; chạy qua `procs.py` |
+| 2 | Kho kịch bản (`page_library.py`, `library.py`) | Hiện có | Duyệt thư mục đầu ra, xem kịch bản. Nút Duyệt / Viết lại / Loại **chưa kiểm chứng đầy đủ** | Thư mục đầu ra (`output_root`) |
+| 3 | Cài đặt luồng (`page_flows.py`, `flows_store.py`) | Hiện có | Chủ đề, nền tảng, thời lượng, giờ chạy + múi giờ, số tin 1–50, trần chi phí/ngày, KOC | `config/flows.yaml` |
+| 4 | Cài đặt chung (`page_settings.py`, `env_store.py`) | Hiện có | Ngôn ngữ, chủ đề, số agent song song 1–8, nhà cung cấp Gemini, khoá (che) | `config/app_settings.json`; khoá trong `.env` |
+| 5 | Tài khoản Claude (`page_account.py`, `auth.py`) | Hiện có | Trạng thái đăng nhập, đăng nhập/đăng xuất, cảnh báo khoá API | Phiên đăng nhập của Claude CLI (không lưu ở dự án) |
+| 6 | **Gemini** | Đang làm (UI-Gemini) | Bật/tắt, xem thang model và model đang nghỉ, nút `probe()`, bật/tắt `gemini_fallback`, chu kỳ làm mới | `config/app_settings.json`; trạng thái nghỉ ở `config/gemini_models.json`; khoá `.env` |
+| 7 | **Đội agent** | Kế hoạch | Xem & sửa engine (`claude`/`gemini`) và **model của từng agent**, bật/tắt agent; mở prompt để đọc | Frontmatter `.claude/agents/*.md` (code ghi, không để LLM ghi); thay đổi qua ghi nguyên tử + test `test_agents_files` |
+| 8 | **Hợp đồng & tỉ lệ đạt** | Kế hoạch | Số mục tối thiểu, nguồn bắt buộc, cửa sổ tuổi tin theo agent; xem `compliance` pass/fail theo ngày | Cấu hình hợp đồng (`config/`, do B2 chốt); số đo ở `agnet.db` |
+| 9 | **Nhân vật KOC** | Kế hoạch | Xem/sửa `identity`, xem ảnh tham chiếu, gán nhân vật cho luồng, xem prompt từng cảnh. **Không cho sửa** Lớp B, `negative`, `consistency_lock` (quy tắc cứng số 5) | `config/characters/*.json`; gán ở `flows.yaml` |
+| 10 | **Chi phí & hạn mức** | Kế hoạch | Trần `max_cost_usd_per_day`, hạn mức Gemini còn lại, cảnh báo gần trần | `flows.yaml`; số liệu ở `cost_ledger` trong `agnet.db` |
 
-### 18.4 Xác thực
+Với 10 mục, phím Ctrl+1…9 không phủ hết mục 10; cần bổ sung phím hoặc gộp mục khi làm B5.
 
-- **Claude**: tài khoản đã đăng nhập (`claude auth login`). Đã kiểm chứng: khóa API được ưu tiên hơn tài khoản, nên giao diện cảnh báo khi còn `ANTHROPIC_API_KEY` và loại khóa khỏi tiến trình con.
-- **Gemini** — **đã chốt: khóa Google AI Studio** (`GEMINI_API_KEY` trong `.env`, giao diện luôn che; có hạn mức miễn phí). Chưa có khóa trên máy này nên **chưa gọi thật lần nào**; mã được kiểm bằng transport giả.
-  - **Tự cập nhật danh sách model**: không gõ cứng tên model. Hệ thống gọi API liệt kê model của Google (mặc định mỗi 24 giờ, đặt được 1–168 giờ), phân tích tên → họ, phiên bản, bậc (`pro` > `flash` > `flash-lite`), rồi tự xếp **thang model**. Model mới của Google xuất hiện là vào thang, không cần sửa mã. Bản ghi nhớ ở `config/gemini_models.json` (không chứa khóa).
-  - **Hết định mức thì xuống model thấp hơn** (lỗi 429): thang đi XUỐNG, hết phiên bản này sang phiên bản thấp hơn cùng bậc rồi mới sang bậc thấp hơn. Ví dụ `3.8-pro → 3.7-pro → … → 3.8-flash → 3.7-flash → … → 3.8-flash-lite`. Model hết hạn mức phút thì nghỉ theo `retry_after`, hết hạn mức ngày thì nghỉ tới lúc Google đặt lại. Bản preview chỉ dùng khi không còn bản ổn định. Tắt được trong giao diện (`gemini_fallback`).
-  - Hết cả thang, hoặc khóa sai: lượt đó **chuyển sang Claude** và ghi cảnh báo; pipeline không dừng.
-  - **Chưa kiểm chứng:** tên model thật nào đang tồn tại (`3.8`, `3.7` chỉ là ví dụ); cách Google báo phút/ngày trong lỗi 429; thời điểm đặt lại hạn mức ngày (giả định nửa đêm giờ Los Angeles); bám nguồn tìm kiếm có dùng được cùng lúc với đầu ra JSON ép schema hay không (vì vậy KHÔNG ép schema, chỉ yêu cầu JSON trong prompt).
+### 18.10 Ràng buộc khi sửa từ giao diện
 
-### 18.5 Sản lượng 20 tin/ngày
+Mọi điều khiển chỉ **ghi cấu hình**, không ghi đầu ra kịch bản (đó là việc của `agnet/pipeline/export.py`). Mục "Đội agent" sửa tệp agent nên phải: chỉ cho đổi `model`/`engine`/bật-tắt, **không** cho sửa `tools` thành có Write/Edit (agent không có quyền ghi), và chạy lại kiểm tra tệp agent sau mỗi lần lưu. Luồng `sensitive` không được tắt `human_review` từ giao diện (quy tắc cứng số 3).
 
-- Lấy dư theo mục 6: thu 400–800 RawItem → gom 80–120 Story → chấm điểm → chọn **30** đề tài (20 × 1,5) → viết 30 → QA đạt ≥ 20. Ngưỡng QA ≥ 8 **không hạ** để đủ số lượng; thiếu thì lấy đề tài dự phòng (mục 6).
-- Bảng thời lượng khi quota = 20: `{3-5: 6, 8-12: 10, 15-20: 4}`; giao diện tự chia lại theo tỉ lệ, tổng luôn bằng quota (ràng buộc của `models.py`).
-- `run_timeout_min` nâng 180 → **240** cho luồng 20 tin; lịch nên đặt sớm hơn giờ cần 3 giờ.
-- Ngân sách: `max_cost_usd_per_day` là chốt chặn cứng. Với tài khoản đăng ký, chi phí chỉ là số quy đổi nhưng **hạn mức của gói vẫn bị tiêu hao** — chưa biết gói Pro có chịu nổi 20 tin/ngày hay không (18.9).
+### 18.11 Đã kiểm chứng và chưa kiểm chứng
 
-### 18.6 Song song & giới hạn thực tế
-
-- Số agent chạy song song đặt trong giao diện (mặc định 3, tối đa 8) → `Pipeline.concurrency`.
-- **Phát hiện khi chạy thật 02/10/2026**: nhiều tiến trình Claude Code dùng chung một lần đăng nhập có thể đua nhau làm mới token (`Failed to refresh OAuth token: another Claude Code process is refreshing it`). Lần chạy thật đầu tiên chết ngay ở agent đầu tiên vì lỗi này. Đối sách bắt buộc: **thử lại lùi dần** cho lỗi tạm thời, và **khởi động ấm** bằng một lượt gọi đơn lẻ trước khi bung song song.
-- Phát hiện khi đo 01/10/2026: mỗi lượt gọi tốn 61.517 token đầu vào nếu không tắt nạp cấu hình máy; đã vá còn ~7.000 (`SdkRunner`).
-
-### 18.7 Giao diện cài đặt (làm trước)
-
-| Mục | Điều khiển | Lưu ở |
-|---|---|---|
-| Ngôn ngữ giao diện | Tiếng Việt / English | `config/app_settings.json` |
-| Chủ đề | Sáng / Tối / Theo hệ thống | `config/app_settings.json` |
-| Giờ chạy | Chọn giờ:phút (nhiều mốc) + múi giờ → cron | `flows.yaml` (`schedule`, `timezone`) |
-| Số tin trong ngày | 1–50 (đề xuất 20), tự chia lại bảng thời lượng | `flows.yaml` (`daily_quota`, `duration_mix`) |
-| Số agent song song | 1–8 | `config/app_settings.json` |
-| Nhà cung cấp Gemini | `gemini_api` / `gemini_cli` / tắt, tên model | `config/app_settings.json`; khóa trong `.env` |
-| Trần chi phí/ngày | số USD | `flows.yaml` |
-| Tài khoản Claude | trạng thái đăng nhập, đăng nhập/đăng xuất, cảnh báo khóa API | — |
-
-### 18.8 Lộ trình thi công: UI trước, rồi các agent Claude làm song song
-
-**Giai đoạn A — Giao diện (làm trước) — ĐÃ XONG 02/10/2026, 206 test xanh.** Tab *Cài đặt chung* (`agnet/ui/page_settings.py`: ngôn ngữ, chủ đề, số agent song song, Gemini), tab *Cài đặt luồng* có bộ chọn giờ + múi giờ + số tin 1–50, lưu bằng `agnet/core/settings.py`, áp chủ đề/ngôn ngữ ngay (`theme.py`, `i18n.py`). Số agent song song đã nối vào `runner.py`. Chưa làm: gọi Gemini thật (chờ B1).
-
-**Giai đoạn B — các luồng việc chạy song song bằng agent Claude**, mỗi luồng sở hữu tập tệp riêng để không ghi đè nhau:
-
-| Luồng | Phạm vi | Tệp sở hữu |
-|---|---|---|
-| B1 Gemini client | `GeminiClient` (api + cli), bám nguồn, thử lại; transport giả để test | `agnet/gemini/*`, `tests/test_gemini_*` |
-| B2 Hợp đồng & nghiệm thu | `TaskContract`, bộ nghiệm thu bằng code, đo `compliance` | `agnet/commander/*`, `tests/test_commander_*` |
-| B3 Agent Gemini | khai `engine: gemini` cho 7 agent, viết lại prompt theo hợp đồng | `.claude/agents/01–05,08,09`, `tests/test_agents_files.py` |
-| B4 Nối pipeline | định tuyến theo `engine`, `concurrency`, thử lại OAuth, khởi động ấm, quota 20 | `agnet/pipeline/*`, `agnet/runner.py` |
-| B5 Màn hình còn lại | Kho kịch bản + Duyệt, Nhân vật KOC, tỉ lệ đạt hợp đồng | `agnet/ui/page_library.py`, `page_koc.py` |
-| B6 Kiểm chứng | test toàn bộ, chạy thử 1 tin thật, báo cáo chi phí & agent chậm | `tests/*`, báo cáo |
-
-B1–B3 độc lập hoàn toàn; B4 phụ thuộc B1–B2 (giao diện hàm); B5 độc lập; B6 chạy cuối. Mỗi luồng phải xanh test của riêng nó trước khi gộp.
-
-### 18.9 Đã kiểm chứng và chưa kiểm chứng
-
-**Đã kiểm chứng (đo thật):** chạy bằng tài khoản không cần khóa; khóa API ghi đè tài khoản; `setting_sources=[]` + `tools=` giảm 88,6% token mỗi lượt; khóa daemon sửa xong; 152 test xanh; ứng dụng desktop mở được.
+**Đã kiểm chứng (đo thật):**
+- Chạy Claude bằng tài khoản không cần khoá; khoá API ghi đè tài khoản; `setting_sources=[]` + `tools=` giảm 88,6% token mỗi lượt; khoá daemon sửa xong; ứng dụng desktop mở được.
+- **Gemini 02/10/2026** (18.2): liệt kê được 44 model; gọi thường chạy với `gemini-3.8-flash`; 404 với dòng 2.5; 429 `limit: 0` với `3.1-pro-preview`; **429 bám nguồn trên mọi model thử**; 503 thoáng qua.
 
 **Chưa kiểm chứng:**
-- Gemini: chưa có khóa/CLI nên chưa gọi lần nào; chất lượng bám nguồn, tỉ lệ đạt hợp đồng và hạn mức miễn phí chưa biết.
-- Lần chạy thật 02/10/2026 chết ở agent đầu tiên (lỗi làm mới token); chưa có số đo chi phí hay thời gian của một kịch bản trọn vẹn.
-- Gói Pro có đủ hạn mức cho 20 tin/ngày hay không.
-- Cấu hình hiện tại đang để `max_cost_usd_per_day: 1` và `daily_quota: 1` (cho lần chạy thử); `$1` chắc chắn quá thấp cho một kịch bản dài, cần đặt lại trước khi chạy thật.
+- **Bám nguồn Gemini hoàn toàn chưa chạy được lần nào** → chất lượng bám nguồn, tỉ lệ đạt hợp đồng, thang chi phí Google khi bật thanh toán đều chưa biết. Không có cơ sở nào để khẳng định phương án (a) sẽ gỡ 429 cho tới khi `probe()` chạy lại sau khi bật.
+- Bám nguồn có dùng được cùng lúc với đầu ra JSON ép schema hay không (vì vậy prompt yêu cầu JSON, KHÔNG ép schema).
+- Chất lượng Gemini cho việc không cần nguồn (phân loại/gom cụm/viết nháp) so với Claude **chưa đo**; mới biết là gọi được.
+- Lần chạy thật Claude 02/10/2026 chết ở agent đầu tiên (lỗi làm mới token); chưa có số đo chi phí/thời gian của một kịch bản trọn vẹn.
+- Gói Claude có đủ hạn mức cho 20 tin/ngày hay không — càng đáng lo nếu chọn (b).
+- Cấu hình hiện đang để `max_cost_usd_per_day: 1` và `daily_quota: 1` (cho lần chạy thử); `$1` chắc chắn quá thấp cho một kịch bản dài, cần đặt lại trước khi chạy thật.
+- Các mục giao diện 6–10 chưa tồn tại hoặc đang làm; mô tả ở 18.9 là thiết kế, không phải hiện trạng.
 
 ---
 
 ## 19. Bước tiếp theo
 
-1. Dựng khung dự án giai đoạn 1 trong `D:\DEV\Agnet`.
-2. Chạy thử 1 luồng mẫu → xem 10 kịch bản đầu tiên → tinh chỉnh prompt và rubric.
-3. Chốt schema `script.json` với phần mềm dựng video.
-4. Chọn 1 nhân vật KOC trong thư viện (mục 17.7) → sinh ảnh gốc + bảng nhân vật 9 ảnh → chạy thử 3 cảnh để kiểm độ đồng nhất trước khi bật `koc.enabled` cho luồng thật.
-5. (v1.2) Chốt cách xác thực Gemini (khóa AI Studio hay Gemini CLI) → làm các luồng B1–B6 ở mục 18.8 song song.
-6. (v1.2) Đặt lại `max_cost_usd_per_day` và `daily_quota` sau lần chạy thử, rồi chạy thử 1 tin thật để đo chi phí và agent chậm.
+Trạng thái lộ trình (B1–B6 ở 18.8): **B1 xong; B2, B3, UI-Gemini đang làm; B4–B6 chưa bắt đầu.**
+
+| # | Việc | Ai | Trạng thái |
+|---|---|---|---|
+| 1 | **Chọn phương án (a) hay (b)** ở 18.3 — nút thắt chặn B3/B4 | Người dùng | Chờ quyết định |
+| 2 | Hoàn tất GĐ1: B2, B3, UI-Gemini; cập nhật bảng 18.8 theo báo cáo từng agent | Các agent GĐ1, Tổng chỉ huy commit | Đang làm |
+| 3 | GĐ2: B4 nối pipeline (thử lại OAuth, khởi động ấm, `concurrency`, định tuyến `engine`) rồi màn hình Đội agent / Hợp đồng / KOC / Chi phí | Agent B4, B5 | Kế hoạch |
+| 4 | GĐ3–GĐ4: kiểm kê tệp, test, rà khoá, đối chiếu quy tắc cứng; tổng đánh giá + phản biện độc lập | Nhóm kiểm tra | Kế hoạch |
+| 5 | Đặt lại `max_cost_usd_per_day` và `daily_quota`, chạy thử **1 tin thật**, đọc `logs/agnet.log` và `cost_ledger` để biết chi phí và agent chậm | Người dùng + B6 | Kế hoạch |
+| 6 | Chốt schema `script.json` với phần mềm dựng video thật trước khi đầu tư thêm phần xuất | Người dùng | Chưa làm |
+| 7 | Chọn 1 nhân vật KOC (mục 17.7) → ảnh gốc + bảng 9 ảnh → chạy thử 3 cảnh trước khi bật `koc.enabled` | Người dùng | Chưa làm |
+| 8 | Đăng ký tác vụ Windows (`scripts/register_task.ps1`) và nhập Telegram vào `.env` khi chạy tự động | Người dùng | Chưa làm |
