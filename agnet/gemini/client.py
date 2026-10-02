@@ -28,6 +28,7 @@ from .ladder import ModelInfo, build_ladder, parse_model
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CACHE = ROOT / "config" / "gemini_models.json"
+SEARCH_KEY = "*search"                                   # khoá nghỉ riêng cho công cụ bám nguồn
 
 # transport(method, url, headers, body|None, timeout) -> (status, body_bytes)
 Transport = Callable[[str, str, dict, "bytes | None", float], "tuple[int, bytes]"]
@@ -39,6 +40,11 @@ class GeminiError(Exception):
 
 class GeminiAuthError(GeminiError):
     """Khoá sai/thiếu/bị khoá — hạ model không giải quyết được."""
+
+
+class GroundingUnavailable(GeminiError):
+    """Gọi thường được nhưng bám nguồn Google Search bị từ chối (429) — hạn mức của CÔNG CỤ tìm kiếm, không phải
+    của model, nên hạ model không giúp. Đo thật 02/10/2026: khoá miễn phí bị 429 bám nguồn trên mọi model."""
 
 
 class AllModelsExhausted(GeminiError):
@@ -57,6 +63,11 @@ class GeminiResult:
     queries: list[str] = field(default_factory=list)      # các truy vấn tìm kiếm Gemini đã dùng
     attempts: list[dict] = field(default_factory=list)    # [{"model", "outcome"}] — để thấy đã hạ bậc ở đâu
     fell_back: bool = False                               # True nếu không phải model đầu thang
+
+    @property
+    def grounded(self) -> bool:
+        """Có nguồn bám tìm kiếm thật đi kèm hay không (không có thì KHÔNG được coi là bằng chứng)."""
+        return bool(self.sources)
 
 
 def urllib_transport(method: str, url: str, headers: dict, body: bytes | None, timeout: float):
@@ -89,6 +100,8 @@ def _next_daily_reset(now: float) -> float:
 def parse_quota_error(body: bytes, now: float) -> tuple[float, bool]:
     """Từ thân lỗi 429 → (thời điểm model được dùng lại, là hạn mức ngày?). Chịu được thân lạ."""
     text = body.decode("utf-8", "replace")
+    if re.search(r"limit:\s*0\b", text):                  # model không có hạn mức ở gói này → đừng thử lại sớm
+        return now + 24 * 3600, True
     daily = bool(re.search(r"PerDay|per day|daily", text, re.I))
     delay = None
     m = re.search(r'"retryDelay"\s*:\s*"([\d.]+)s"', text)
@@ -224,7 +237,7 @@ class GeminiClient:
             raise GeminiAuthError(f"khoá Gemini bị từ chối (HTTP {status})")
 
     def generate(self, prompt: str, *, system: str | None = None, search: bool = True,
-                 temperature: float | None = None) -> GeminiResult:
+                 temperature: float | None = None, allow_ungrounded: bool = False) -> GeminiResult:
         payload: dict = {"contents": [{"role": "user", "parts": [{"text": prompt}]}]}
         if system:
             payload["systemInstruction"] = {"parts": [{"text": system}]}
@@ -233,21 +246,45 @@ class GeminiClient:
         if temperature is not None:
             payload["generationConfig"] = {"temperature": temperature}
         body = json.dumps(payload).encode("utf-8")
+        plain = {k: v for k, v in payload.items() if k != "tools"}
+        if search and self._cool.get(SEARCH_KEY, 0) > self._now():      # đã biết bám nguồn đang bị chặn → khỏi đốt thang
+            if not allow_ungrounded:
+                raise GroundingUnavailable("bám nguồn Google Search đang bị chặn (429) — xem Gemini > Kiểm tra khóa")
+            search, body = False, json.dumps(plain).encode("utf-8")
 
         attempts: list[dict] = []
-        lad = self.ladder()
-        for idx, m in enumerate(lad):
-            if self._cool.get(m.name, 0) > self._now():
+        quota_hits = probes = 0
+        for idx, m in enumerate(self.ladder()):
+            if self._cool.get(self._ck(m, search), 0) > self._now():
                 attempts.append({"model": m.name, "outcome": "cooling"})
                 continue
-            res = self._try_model(m, body, attempts)
+            res = self._try_model(m, body, attempts, search)
             if res is not None:
                 res.attempts = attempts
                 res.fell_back = idx > 0 or any(a["outcome"] != "ok" for a in attempts)
                 return res
+            if search and attempts[-1]["outcome"].startswith("quota"):
+                quota_hits += 1
+                if quota_hits >= 2 and probes < 3:          # nghi ngờ hạn mức công cụ: thử gọi thường để phân biệt
+                    probes += 1
+                    p = self._try_model(m, json.dumps(plain).encode("utf-8"), [], False)
+                    if p is not None:
+                        self._cool[SEARCH_KEY] = self._now() + 3600
+                        self._cool = {k: v for k, v in self._cool.items() if not k.endswith("#search")}
+                        self._cool[SEARCH_KEY] = self._now() + 3600
+                        self._save_cache()
+                        if not allow_ungrounded:
+                            raise GroundingUnavailable(
+                                "gọi thường được nhưng bám nguồn Google Search bị 429 — cần bật thanh toán/hạn mức tìm kiếm")
+                        p.attempts, p.fell_back = attempts + [{"model": m.name, "outcome": "ungrounded"}], True
+                        return p
         raise AllModelsExhausted("hết thang model Gemini (định mức hoặc lỗi máy chủ)", attempts)
 
-    def _try_model(self, m: ModelInfo, body: bytes, attempts: list[dict]) -> GeminiResult | None:
+    @staticmethod
+    def _ck(m: ModelInfo, search: bool) -> str:
+        return m.name + ("#search" if search else "")
+
+    def _try_model(self, m: ModelInfo, body: bytes, attempts: list[dict], search: bool = False) -> GeminiResult | None:
         url = f"{BASE}/models/{m.name}:generateContent"
         for n in range(self.server_retries + 1):
             status, raw = self._tx("POST", url, self._headers(), body, self.timeout)
@@ -262,7 +299,7 @@ class GeminiClient:
             self._raise_auth(status, raw)
             if status == 429:
                 until, daily = parse_quota_error(raw, self._now())
-                self._cool[m.name] = until
+                self._cool[self._ck(m, search)] = until
                 self._save_cache()
                 attempts.append({"model": m.name, "outcome": "quota_daily" if daily else "quota_minute"})
                 return None
@@ -296,3 +333,44 @@ class GeminiClient:
                 seen.add(u)
                 sources.append({"url": u, "title": web.get("title", "")})
         return GeminiResult(text=text, model=model, sources=sources, queries=list(gm.get("webSearchQueries", [])))
+
+    # ---- chẩn đoán cho giao diện ------------------------------------------------------------------------
+    def probe(self) -> dict:
+        """Kiểm tra khoá: liệt kê model, gọi thường, gọi bám nguồn. Không ném lỗi; trả báo cáo để hiển thị."""
+        rep: dict = {"key": "?", "models": 0, "plain": "?", "search": "?", "model": "", "note": ""}
+        try:
+            names = self.list_models()
+            rep["key"], rep["models"] = "ok", len(names)
+        except GeminiAuthError as e:
+            rep["key"], rep["note"] = "bad", str(e)
+            return rep
+        except GeminiError as e:
+            rep["key"], rep["note"] = "error", str(e)
+            return rep
+        self._cache["fetched_at"], self._cache["models"] = self._now(), names
+        self._save_cache()
+        self._ladder = None
+        try:
+            r = self.generate("Trả lời đúng một từ: ok", search=False)
+            rep["plain"], rep["model"] = "ok", r.model
+        except GeminiError as e:
+            rep["plain"], rep["note"] = "fail", f"{type(e).__name__}: {e}"
+            return rep
+        self._cool.pop(SEARCH_KEY, None)
+        try:
+            r = self.generate("Tin công nghệ mới nhất hôm nay là gì? Một câu.", search=True)
+            rep["search"] = "ok" if r.grounded else "no_sources"
+        except GroundingUnavailable:
+            rep["search"], rep["note"] = "blocked", "Bám nguồn Google Search bị 429 (thường do gói miễn phí)."
+        except GeminiError as e:
+            rep["search"], rep["note"] = "fail", f"{type(e).__name__}: {e}"
+        return rep
+
+    def status(self) -> list[dict]:
+        """Thang hiện tại kèm trạng thái nghỉ — để giao diện hiển thị."""
+        now, out = self._now(), []
+        for m in self.ladder():
+            cd = self._cool.get(m.name, 0)
+            out.append({"name": m.name, "tier": m.tier, "version": ".".join(map(str, m.version)),
+                        "preview": m.preview, "cooldown_s": max(0, int(cd - now))})
+        return out

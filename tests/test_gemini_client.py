@@ -81,7 +81,7 @@ def test_het_dinh_muc_ngay_nghi_den_nua_dem_LA(tmp_path):
     c, _, _ = mk(tmp_path, {"gemini-3.8-pro": [quota(daily=True)], "gemini-3.7-pro": ok()})
     r = c.generate("x")
     assert r.attempts[0]["outcome"] == "quota_daily"
-    assert 0 < c._cool["gemini-3.8-pro"] - 1_000_000.0 <= 24 * 3600 + 10
+    assert 0 < c._cool["gemini-3.8-pro#search"] - 1_000_000.0 <= 24 * 3600 + 10
 
 
 def test_het_ca_thang_nem_loi(tmp_path):
@@ -172,3 +172,51 @@ def test_extract_json():
     assert extract_json('Đây là kết quả: [{"x": 2}] hết') == [{"x": 2}]
     with pytest.raises(ValueError):
         extract_json("không có json")
+
+
+# ---- bám nguồn bị chặn (đo thật 02/10/2026: gọi thường 200, google_search 429 trên mọi model) -------------
+def _search_blocked_fake(models=("gemini-3.8-pro", "gemini-3.7-pro", "gemini-3.8-flash", "gemini-3.8-flash-lite")):
+    class F(Fake):
+        def __call__(self, method, url, headers, body, timeout):
+            if method == "POST":
+                self.calls.append((method, url))
+                return quota() if b"google_search" in body else ok("thường")
+            return super().__call__(method, url, headers, body, timeout)
+    return F({})
+
+
+def test_bam_nguon_bi_chan_khong_dot_thang_va_bao_dung_nguyen_nhan(tmp_path):
+    from agnet.gemini import GroundingUnavailable
+    fake = _search_blocked_fake()
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: 1e6)
+    with pytest.raises(GroundingUnavailable):
+        c.generate("x")
+    assert len(fake.posts()) == 3                    # 2 lần 429 + 1 lần gọi thường để phân biệt, KHÔNG đốt cả thang
+    with pytest.raises(GroundingUnavailable):        # lần sau: biết rồi, không gọi mạng nữa
+        c.generate("y")
+    assert len(fake.posts()) == 3
+
+
+def test_cho_phep_khong_bam_nguon_thi_tra_ket_qua_danh_dau(tmp_path):
+    fake = _search_blocked_fake()
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: 1e6)
+    r = c.generate("x", allow_ungrounded=True)
+    assert r.text == "thường" and not r.grounded and r.fell_back
+
+
+def test_limit_0_nghi_24h(tmp_path):
+    body = b'{"error":{"message":"Quota exceeded ... limit: 0, model: gemini-3.1-pro"}}'
+    c, _, _ = mk(tmp_path, {"gemini-3.8-pro": [(429, body)], "gemini-3.7-pro": ok()})
+    r = c.generate("x", search=False)
+    assert r.model == "gemini-3.7-pro" and c._cool["gemini-3.8-pro"] - 1e6 >= 24 * 3600 - 1
+
+
+def test_probe_bao_cao(tmp_path):
+    fake = _search_blocked_fake()
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: 1e6)
+    rep = c.probe()
+    assert (rep["key"], rep["plain"], rep["search"]) == ("ok", "ok", "blocked") and rep["models"] == 4
+
+    def bad(method, url, h, b, t):
+        return 403, b"denied"
+    assert GeminiClient("K", cache_path=tmp_path / "n.json", transport=bad).probe()["key"] == "bad"
