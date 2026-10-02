@@ -87,9 +87,11 @@ class GeminiRunner:
 
     def __init__(self, client, fallback: AgentRunner, *, store: ComplianceStore | None = None,
                  min_items: dict[str, int] | None = None, max_age_hours: float = 48.0,
+                 require_grounding: bool = True,
                  now: Callable[[], datetime] = lambda: datetime.now(timezone.utc)):
         self.client, self.fallback, self.store = client, fallback, store
         self.min_items, self.max_age_hours, self._now = min_items or {}, max_age_hours, now
+        self.require_grounding = require_grounding
         self.warnings: list[str] = []
 
     def _warn(self, msg: str) -> None:
@@ -97,6 +99,11 @@ class GeminiRunner:
         self.warnings.append(msg)
 
     async def _fallback(self, agent, prompt, budget, why: str) -> AgentResult:
+        if self.require_grounding:
+            # BẮT BUỘC bám nguồn: Gemini không bám được thì nguồn này bị LOẠI, không để Claude làm thay.
+            reason = f"grounding_required: Gemini không bám nguồn được ({why})"
+            self._warn(f"{agent.name}: {reason} — bỏ nguồn này, KHÔNG chuyển sang Claude")
+            return AgentResult(json.dumps({"items": [], "reason": reason}, ensure_ascii=False))
         self._warn(f"{agent.name}: Gemini không dùng được ({why}) — chuyển sang Claude")
         return await self.fallback.run(agent, prompt, max_budget_usd=budget)
 
@@ -200,5 +207,6 @@ def build_runner(settings: app_settings.Settings | None = None, *, claude: Agent
         router.notes.append(f"thiếu khoá Gemini ({e}) — mọi agent chạy Claude")
         log.warning(router.notes[-1])
         return router
-    router.gemini = GeminiRunner(client, base, store=store or ComplianceStore(db))
+    router.gemini = GeminiRunner(client, base, store=store or ComplianceStore(db),
+                                 require_grounding=s.gemini_require_grounding)
     return router

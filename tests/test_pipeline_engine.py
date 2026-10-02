@@ -54,9 +54,10 @@ GOOD = json.dumps([{"title": "T", "url": URL, "source": "VnExpress", "published_
                     "snippet": "s", "signal": 12, "answered": False}])
 
 
-def gem(client, tmp_path, claude=None):
+def gem(client, tmp_path, claude=None, require_grounding=False):
     claude = claude or ClaudeStub()
-    return GeminiRunner(client, claude, store=ComplianceStore(tmp_path / "c.db"), now=lambda: NOW), claude
+    return GeminiRunner(client, claude, store=ComplianceStore(tmp_path / "c.db"), now=lambda: NOW,
+                        require_grounding=require_grounding), claude
 
 
 # ---- AgentSpec.engine --------------------------------------------------------------------------------
@@ -116,6 +117,35 @@ def test_gemini_loi_thi_chuyen_sang_claude(tmp_path, exc):
     res = run(runner.run(spec(), prompt(), max_budget_usd=1))
     assert claude.calls == ["trend-scout"] and res.cost_usd == 0.1
     assert any("chuyển sang Claude" in w for w in runner.warnings)
+
+
+@pytest.mark.parametrize("exc", [GroundingUnavailable("429 search"), AllModelsExhausted("hết", []),
+                                 GeminiAuthError("khoá sai")])
+def test_bat_buoc_bam_nguon_khong_de_claude_lam_thay(tmp_path, exc):
+    runner, claude = gem(FakeGemini(exc=exc), tmp_path, require_grounding=True)
+    data = json.loads(run(runner.run(spec(), prompt(), max_budget_usd=1)).text)
+    assert claude.calls == [] and data["items"] == [] and data["reason"].startswith("grounding_required")
+    assert any("KHÔNG chuyển sang Claude" in w for w in runner.warnings)
+
+
+def test_build_runner_mac_dinh_bat_buoc_bam_nguon(tmp_path):
+    r = build_runner(S.Settings(gemini_provider="gemini_api"), claude=ClaudeStub(), db=str(tmp_path / "a.db"),
+                     api_key="K", client_factory=lambda k, s: FakeGemini(GOOD))
+    assert r.gemini.require_grounding is True
+    r = build_runner(S.Settings(gemini_provider="gemini_api", gemini_require_grounding=False), claude=ClaudeStub(),
+                     db=str(tmp_path / "b.db"), api_key="K", client_factory=lambda k, s: FakeGemini(GOOD))
+    assert r.gemini.require_grounding is False
+
+
+def test_khao_sat_rong_thi_dung_khong_viet_tu_du_lieu_trong(tmp_path):
+    class Empty(FakeRunner):
+        async def run(self, agent, prompt, *, max_budget_usd):
+            if agent.name in SCOUTS:
+                return AgentResult('{"items": [], "reason": "grounding_required: x"}')
+            return await super().run(agent, prompt, max_budget_usd=max_budget_usd)
+    p = Pipeline(_flow(), load_agents(), Empty(), Store(tmp_path / "t.db"), date(2026, 10, 2), tmp_path / "o")
+    res = asyncio.run(p.run())
+    assert res["status"].startswith("dừng: khảo sát không thu được") and res["passed"] == 0
 
 
 def test_sai_hop_dong_khong_bia_thay(tmp_path):

@@ -37,6 +37,10 @@ class StoryOutcome:
     folder: str | None = None
 
 
+class SurveyEmpty(RuntimeError):
+    """Mọi nguồn khảo sát đều rỗng (vd. Gemini không bám nguồn được) — không được bịa thay."""
+
+
 @dataclass
 class Pipeline:
     flow: Flow
@@ -125,6 +129,8 @@ class Pipeline:
             if sv.dropped:
                 self.errors.append(f"{n}: bỏ {sv.dropped} mục không phải đối tượng JSON")
             out.append(sv.as_dict(n))
+        if not any(o.get("items") for o in out):
+            raise SurveyEmpty("khảo sát không thu được mục nào có nguồn — dừng, không viết kịch bản từ dữ liệu trống")
         return out
 
     # ---- một kịch bản ---------------------------------------------------------
@@ -232,6 +238,8 @@ class Pipeline:
                 status = f"thiếu sản lượng: {passed}/{self.flow.daily_quota} (không hạ ngưỡng QA)"
         except BudgetExceeded as e:
             status = f"dừng vì hết ngân sách: {e}"
+        except SurveyEmpty as e:
+            status = f"dừng: {e}"
         self.errors.extend(w for w in getattr(self.runner, "warnings", []) if w not in self.errors)
         spent = self.store.spent_today(self.flow.id, self.today)
         report = export.daily_report(self.flow.id, day, [o.__dict__ for o in outcomes], spent, status, self.errors)

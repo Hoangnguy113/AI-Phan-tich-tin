@@ -99,6 +99,7 @@ EN: dict[str, str] = {
     "Khóa Gemini API:": "Gemini API key:",
     "Dán khóa mới (để trống = giữ khóa hiện tại)": "Paste a new key (leave empty to keep the current one)",
     "Xóa khóa": "Remove key",
+    "BẮT BUỘC bám nguồn tìm kiếm (không bám được thì bỏ nguồn, không để Claude làm thay)": "REQUIRE search grounding (if it fails, drop the source; Claude does not take over)",
     # trang Gemini
     "Khóa và trạng thái": "Key & status",
     "Kiểm tra khóa": "Check key",

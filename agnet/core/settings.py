@@ -33,6 +33,7 @@ class Settings:
     gemini_fallback: bool = True            # hết định mức (429) thì xuống model thấp hơn
     gemini_tier: str = "pro"                # bậc muốn dùng trước: pro > flash > flash-lite
     gemini_refresh_hours: int = 24          # bao lâu tải lại danh sách model một lần
+    gemini_require_grounding: bool = True   # BẮT BUỘC bám nguồn Google Search cho khảo sát; không bám được thì KHÔNG chuyển sang Claude làm thay
 
     def normalized(self) -> "Settings":
         """Đưa mọi giá trị về miền hợp lệ — tin tưởng file sửa tay hay giá trị rác đều không vỡ."""
@@ -57,6 +58,7 @@ class Settings:
             gemini_fallback=bool(self.gemini_fallback),
             gemini_tier=self.gemini_tier if self.gemini_tier in GEMINI_TIERS else "pro",
             gemini_refresh_hours=max(rlo, min(rhi, hrs)),
+            gemini_require_grounding=bool(self.gemini_require_grounding),
         )
 
 

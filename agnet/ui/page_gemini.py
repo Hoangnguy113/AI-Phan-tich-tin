@@ -21,7 +21,8 @@ from ..gemini.client import GeminiClient
 from . import env_store
 
 KEY_NAME = "GEMINI_API_KEY"
-POLICY_FIELDS = ("gemini_tier", "gemini_auto_update", "gemini_fallback", "gemini_refresh_hours")
+POLICY_FIELDS = ("gemini_tier", "gemini_auto_update", "gemini_fallback", "gemini_refresh_hours",
+                 "gemini_require_grounding")
 
 ClientFactory = Callable[[S.Settings], GeminiClient]
 
@@ -125,6 +126,7 @@ class GeminiPage(QWidget):
             self.tier.addItem(label, data)
         self.auto_update = QCheckBox("Tự cập nhật danh sách model từ Google")
         self.fallback = QCheckBox("Hạ xuống model thấp hơn khi hết định mức")
+        self.require = QCheckBox("BẮT BUỘC bám nguồn tìm kiếm (không bám được thì bỏ nguồn, không để Claude làm thay)")
         self.refresh_hours = QSpinBox()
         self.refresh_hours.setRange(*S.REFRESH_HOURS_RANGE)
         self.refresh_hours.setSuffix("  giờ")
@@ -137,6 +139,7 @@ class GeminiPage(QWidget):
         f3.addRow("Bậc ưu tiên:", self.tier)
         f3.addRow(self.auto_update)
         f3.addRow(self.fallback)
+        f3.addRow(self.require)
         f3.addRow("Tải lại danh sách mỗi:", self.refresh_hours)
         f3.addRow(self.btn_save)
         f3.addRow(self.msg)
@@ -159,6 +162,7 @@ class GeminiPage(QWidget):
         self.tier.setCurrentIndex(max(0, self.tier.findData(s.gemini_tier)))
         self.auto_update.setChecked(s.gemini_auto_update)
         self.fallback.setChecked(s.gemini_fallback)
+        self.require.setChecked(s.gemini_require_grounding)
         self.refresh_hours.setValue(s.gemini_refresh_hours)
         key = read_key(self.env_path)
         if key:
@@ -172,7 +176,7 @@ class GeminiPage(QWidget):
 
     def current_policy(self) -> dict:
         return {"gemini_tier": self.tier.currentData(), "gemini_auto_update": self.auto_update.isChecked(),
-                "gemini_fallback": self.fallback.isChecked(), "gemini_refresh_hours": self.refresh_hours.value()}
+                "gemini_fallback": self.fallback.isChecked(), "gemini_require_grounding": self.require.isChecked(), "gemini_refresh_hours": self.refresh_hours.value()}
 
     def save(self) -> None:
         try:

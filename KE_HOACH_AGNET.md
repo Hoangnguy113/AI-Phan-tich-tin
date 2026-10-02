@@ -1010,6 +1010,8 @@ Thêm vào **Web UI** (mục 12): màn hình **Quản lý nhân vật** — xem/
 
 ### 18.3 Quyết định cần người dùng
 
+> **ĐÃ CHỐT 02/10/2026 (người dùng): chọn (a) — Gemini PHẢI bám nguồn tìm kiếm cho phân tích thị trường.** Cài đặt `gemini_require_grounding` (mặc định bật, sửa ở mục Gemini): Gemini không bám được thì nguồn đó bị LOẠI (`grounding_required`), Claude KHÔNG làm thay; nếu mọi nguồn khảo sát rỗng thì lần chạy dừng ("dừng: khảo sát không thu được mục nào có nguồn"), không viết kịch bản từ dữ liệu trống. Hệ quả hiện tại: cho tới khi bật thanh toán/hạn mức tìm kiếm Google, luồng khảo sát sẽ dừng — đây là chủ đích, không phải lỗi. Cũng chốt: không nới ngày (`published_at` bắt buộc), bật `keyword-miner` + `competitor-gap-analyst` mặc định.
+
 | Phương án | Nội dung | Được | Mất |
 |---|---|---|---|
 | **(a) Bật thanh toán / hạn mức tìm kiếm Google** | Nâng gói Google AI Studio để `google_search` có hạn mức | Giữ nguyên thiết kế v1.2: 7 scout chạy Gemini có bám nguồn, nhẹ gánh hạn mức Claude | Phát sinh chi phí Google (chưa đo: số lượt tìm kiếm/ngày × giá); phải chạy lại `probe()` để chắc 429 đã hết |
