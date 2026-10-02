@@ -50,6 +50,27 @@ S = {
      dict(suc_hut=66, impact=40, reach=68, evergreen=70, freshness=8,  source_trust=42, readiness=50, risk_low=40)),
 }
 
+# ---------------------------------------------------------------------------
+# Cập nhật 02/10/2026 — sau khi ĐÃ XÁC MINH bằng tìm kiếm thật.
+# Chỉ sửa thành phần nào có bằng chứng mới; mọi thành phần khác giữ nguyên.
+# Nguồn và nội dung từng phát hiện: Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md
+# ---------------------------------------------------------------------------
+SAU_XAC_MINH = {
+    # Bảng phân biệt cúm/cảm lạnh: có nguồn báo Sức khỏe & Đời sống (Bộ Y tế) 22/09/2026
+    1: dict(readiness=85),
+    # Đủ 5 bậc thuế (đã kiểm nhất quán bằng code) + chốt được mốc ngày áp dụng
+    3: dict(readiness=82),
+    # Trả lời được câu bảo hiểm tiền gửi; hạn mức 125 triệu làm hook mạnh hơn trước
+    4: dict(readiness=70, suc_hut=95, risk_low=52),
+    # Nghị định 142/2026 hiệu lực 01/05/2026, Điều 11.4, mức phạt, lộ trình tuân thủ
+    8: dict(readiness=72, source_trust=88, risk_low=55),
+}
+
+APPLY_SAU_XAC_MINH = True   # đặt False để xem lại thứ hạng ngày 01/10 (trước xác minh)
+if APPLY_SAU_XAC_MINH:
+    for _i, _patch in SAU_XAC_MINH.items():
+        S[_i][1].update(_patch)
+
 assert abs(sum(W.values()) - 1.0) < 1e-9, sum(W.values())
 for i, (n, c) in S.items():
     assert set(c) == set(W), (i, set(W) ^ set(c))

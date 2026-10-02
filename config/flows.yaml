@@ -32,3 +32,124 @@ flows:
     catchup_until: "12:00"   # nhưng chỉ bù nếu còn trước 12:00 trưa (giờ Asia/Bangkok)
     run_timeout_min: 180     # quá 3 giờ chưa xong thì dừng, báo lỗi, chờ ngày mai
     notify: [telegram]       # báo kết quả qua Telegram (khoá đặt trong .env)
+
+  # ------------------------------------------------------------------
+  # Ba luồng dưới đây thêm ngày 02/10/2026 theo quyết định sản xuất
+  # (xem "Claude outputs/QUYET_DINH_SAN_XUAT_2026-10-02.md").
+  #
+  # TẤT CẢ ĐANG enabled: false — CÓ CHỦ Ý.
+  # Lý do: chi phí thật mỗi luồng/ngày chưa đo. Lần chạy thật 01/10/2026
+  # tốn $1,16 cho 4 lượt gọi rồi treo. Bật từng luồng MỘT, xem
+  # `python -m agnet status` và bảng cost_ledger, chốt max_cost_usd_per_day
+  # rồi mới bật luồng tiếp theo. Bật cả ba cùng lúc là đốt tiền mù.
+  # Bật: đổi enabled thành true, rồi `python -m agnet flows` để kiểm.
+  # ------------------------------------------------------------------
+
+  - id: taichinh-yt-trua
+    name: "Tài chính & thuế – YouTube trưa"
+    enabled: false
+    topic: "Thuế, lãi suất, tiền cá nhân cho người đi làm và hộ kinh doanh"
+    seed_keywords: ["thuế thu nhập cá nhân", "giảm trừ gia cảnh", "lãi suất tiết kiệm", "hộ kinh doanh", "bảo hiểm tiền gửi"]
+    exclude_keywords: ["khuyến nghị mua bán", "mã chứng khoán", "tiền ảo", "lãi kép thần thánh"]
+    audience: "Người đi làm ăn lương và chủ hộ kinh doanh 25–50 tuổi tại Việt Nam"
+    region: VN
+    language: vi
+    platform: youtube
+    aspect_ratio: "16:9"
+    duration_min: 8
+    duration_max: 16
+    duration_mix: {8-12: 1}
+    daily_quota: 1
+    schedule: [10 11 * * *]
+    timezone: Asia/Bangkok
+    sources: [google_trends, youtube, rss_vn]
+    tone: "Bình tĩnh, tính bằng ví dụ, không hứa làm giàu"
+    narrator_persona: "Người am hiểu thuế, xưng 'mình', luôn nhắc đối chiếu kế toán/cơ quan thuế"
+    cta_style: "Lưu lại để tính lại khi quyết toán"
+    brand_rules:
+      - "Không khuyên gửi/không gửi, không khuyên mua sản phẩm tài chính nào"
+      - "Không nói ngân hàng X an toàn hay không an toàn"
+      - "Mọi ví dụ tính phải ghi rõ 'ví dụ minh họa của biên tập', nêu quy ước tính"
+      - "Luôn hiện ngày của số liệu trên màn hình: lãi suất và văn bản thuế đổi nhanh"
+    title_style: curiosity
+    strict_factcheck: true
+    sensitive: true
+    human_review: true
+    max_cost_usd_per_day: 1
+    output_dir: output
+    catchup: true
+    catchup_until: "15:00"
+    run_timeout_min: 180
+    notify: [telegram]
+
+  - id: congnghe-yt-chieu
+    name: "Công nghệ & AI thực dụng – YouTube chiều"
+    enabled: false
+    topic: "AI dùng được trong đời sống và công việc, kèm giới hạn và rủi ro"
+    seed_keywords: ["AI agent", "trợ lý AI", "gắn nhãn nội dung AI", "quyền truy cập", "tự động hoá tiệm nhỏ"]
+    exclude_keywords: ["kiếm tiền với AI", "khoá học", "tin đồn mô hình mới", "rò rỉ"]
+    audience: "Người dùng và chủ việc nhỏ 22–45 tuổi, muốn dùng AI mà không bị hớ"
+    region: VN
+    language: vi
+    platform: youtube
+    aspect_ratio: "16:9"
+    duration_min: 8
+    duration_max: 16
+    duration_mix: {8-12: 1}
+    daily_quota: 1
+    schedule: [10 15 * * *]
+    timezone: Asia/Bangkok
+    sources: [google_trends, youtube, rss_vn]
+    tone: "Tỉnh táo, thử trước rồi nói, nêu rõ cái gì chưa kiểm được"
+    narrator_persona: "Người dùng cẩn thận, xưng 'mình', không thần thánh hoá công nghệ"
+    cta_style: "Lưu lại để dùng khi cài đặt"
+    brand_rules:
+      - "Số liệu do nhà cung cấp tự báo: luôn kèm 'theo nhà cung cấp', không trình bày như số liệu độc lập"
+      - "Không dùng tin đồn chưa có thông báo chính thức làm dữ kiện"
+      - "Nội dung pháp lý: nêu đúng văn bản, số điều khoản, ngày hiệu lực; không kết luận thay luật sư"
+    title_style: curiosity
+    strict_factcheck: true
+    sensitive: false
+    human_review: true      # bật dù không sensitive: nhóm này chạm nội dung pháp lý
+    max_cost_usd_per_day: 1
+    output_dir: output
+    catchup: true
+    catchup_until: "19:00"
+    run_timeout_min: 180
+    notify: [telegram]
+
+  - id: lamdep-tiktok-toi
+    name: "Làm đẹp có dẫn nguồn – TikTok tối"
+    enabled: false
+    topic: "Chăm sóc da và làm đẹp: phá định kiến bằng nguồn y khoa"
+    seed_keywords: ["retinol", "vitamin C", "kem chống nắng", "thành phần kỵ nhau", "quy trình skincare"]
+    exclude_keywords: ["review hãng", "mã giảm giá", "trị nám cấp tốc", "kem trộn"]
+    audience: "Người 18–35 tuổi quan tâm chăm sóc da, hay gặp thông tin trái chiều"
+    region: VN
+    language: vi
+    platform: tiktok
+    aspect_ratio: "9:16"
+    duration_min: 5
+    duration_max: 10
+    duration_mix: {5-8: 1}
+    daily_quota: 1
+    schedule: [10 19 * * *]
+    timezone: Asia/Bangkok
+    sources: [google_trends, youtube, rss_vn, pubmed]
+    tone: "Gọn, cụ thể, mỗi khẳng định một nguồn"
+    narrator_persona: "Người đọc tài liệu kỹ, xưng 'mình', không hứa hiệu quả"
+    cta_style: "Lưu lại quy trình"
+    brand_rules:
+      - "Không nêu tên hãng, không so sánh sản phẩm"
+      - "Không hứa hiệu quả, không nói 'trị khỏi'"
+      - "Da nhạy cảm, đang có bệnh da, mang thai: luôn chuyển sang bác sĩ da liễu"
+    title_style: curiosity
+    strict_factcheck: true
+    sensitive: true
+    human_review: true
+    max_cost_usd_per_day: 1
+    output_dir: output
+    catchup: true
+    catchup_until: "23:00"
+    run_timeout_min: 120
+    notify: [telegram]
