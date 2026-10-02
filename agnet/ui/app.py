@@ -10,6 +10,8 @@ from ..core import settings as S
 from ..env import load_env
 from . import i18n, theme
 from .page_account import AccountPage
+from .page_agents import AgentsPage
+from .page_contracts import ContractsPage
 from .page_flows import FlowsPage
 from .page_gemini import GeminiPage
 from .page_library import LibraryPage
@@ -32,13 +34,16 @@ class MainWindow(QMainWindow):
         self.general = SettingsPage(settings_path, env_path)
         self.account = AccountPage(flows_path, db_path)
         self.gemini = GeminiPage(settings_path, env_path)
+        self.agents = AgentsPage()
+        self.contracts = ContractsPage(db_path)
         self.gemini.changed.connect(self.apply_settings)
         self.flows.changed.connect(self.runs.refresh)
         self.general.changed.connect(self.apply_settings)
 
-        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…6: chuyển mục")
+        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…8: chuyển mục")
         for title, page in (("Bảng điều khiển", self.runs), ("Kho kịch bản", self.library),
-                            ("Cài đặt luồng", self.flows), ("Gemini", self.gemini), ("Cài đặt chung", self.general),
+                            ("Cài đặt luồng", self.flows), ("Gemini", self.gemini),
+                            ("Đội agent", self.agents), ("Hợp đồng & tỉ lệ đạt", self.contracts), ("Cài đặt chung", self.general),
                             ("Tài khoản Claude", self.account)):
             self.shell.add_page(title, page)
         self.setCentralWidget(self.shell)

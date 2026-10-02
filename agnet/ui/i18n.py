@@ -32,7 +32,9 @@ EN: dict[str, str] = {
     "Cài đặt chung": "General settings",
     "Tài khoản Claude": "Claude account",
     "Quản lý luồng kịch bản": "Script flow management",
-    "Ctrl+1…6: chuyển mục": "Ctrl+1…6: switch section",
+    "Ctrl+1…8: chuyển mục": "Ctrl+1…8: switch section",
+    "Đội agent": "Agent team",
+    "Hợp đồng & tỉ lệ đạt": "Contracts & pass rate",
     # chung
     "Lưu": "Save",
     "Bỏ thay đổi": "Discard changes",
@@ -117,6 +119,16 @@ EN: dict[str, str] = {
     "Tải lại danh sách mỗi:": "Reload list every:",
     "  giờ": "  hours",
     "Lưu chính sách": "Save policy",
+    # trang Đội agent / Hợp đồng
+    "Số": "No.", "Tên": "Name", "Tầng": "Tier", "Công cụ": "Tools",
+    "Lưu thay đổi": "Save changes", "Hoàn tác": "Undo",
+    "Chỉ đổi được engine và model. Công cụ (tools) chỉ đọc; agent không có quyền Write/Edit. "
+    "Chỉ 7 agent khảo sát mới được chọn gemini.":
+        "Only engine and model can be changed. Tools are read-only; agents never get Write/Edit. "
+        "Only the 7 research agents may use gemini.",
+    "Số lượt": "Runs", "Đạt": "Passed", "Không đạt": "Failed", "Đạt ngay lần 1": "First-try passes",
+    "Tỉ lệ đạt": "Pass rate", "Chưa có lượt chạy Gemini nào.": "No Gemini runs yet.",
+    "N lượt gần nhất: ": "Last N runs: ", "tất cả": "all",
 }
 
 
