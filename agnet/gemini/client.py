@@ -28,6 +28,7 @@ from .ladder import ModelInfo, build_ladder, parse_model
 BASE = "https://generativelanguage.googleapis.com/v1beta"
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CACHE = ROOT / "config" / "gemini_models.json"
+SEARCH_BLOCK_S = 600                                     # sau khi hạ hết thang vẫn 429: khỏi thử lại 10 phút
 SEARCH_KEY = "*search"                                   # khoá nghỉ riêng cho công cụ bám nguồn
 
 # transport(method, url, headers, body|None, timeout) -> (status, body_bytes)
@@ -253,8 +254,9 @@ class GeminiClient:
             search, body = False, json.dumps(plain).encode("utf-8")
 
         attempts: list[dict] = []
-        quota_hits = probes = 0
-        for idx, m in enumerate(self.ladder()):
+        for idx, m in enumerate(self.ladder()):             # 429 → model đó nghỉ, hạ xuống model thấp hơn
+            if search and not m.grounding:                  # Gemma không có Google Search → bỏ qua khi cần bám nguồn
+                continue
             if self._cool.get(self._ck(m, search), 0) > self._now():
                 attempts.append({"model": m.name, "outcome": "cooling"})
                 continue
@@ -263,21 +265,24 @@ class GeminiClient:
                 res.attempts = attempts
                 res.fell_back = idx > 0 or any(a["outcome"] != "ok" for a in attempts)
                 return res
-            if search and attempts[-1]["outcome"].startswith("quota"):
-                quota_hits += 1
-                if quota_hits >= 2 and probes < 3:          # nghi ngờ hạn mức công cụ: thử gọi thường để phân biệt
-                    probes += 1
-                    p = self._try_model(m, json.dumps(plain).encode("utf-8"), [], False)
-                    if p is not None:
-                        self._cool[SEARCH_KEY] = self._now() + 3600
-                        self._cool = {k: v for k, v in self._cool.items() if not k.endswith("#search")}
-                        self._cool[SEARCH_KEY] = self._now() + 3600
-                        self._save_cache()
-                        if not allow_ungrounded:
-                            raise GroundingUnavailable(
-                                "gọi thường được nhưng bám nguồn Google Search bị 429 — cần bật thanh toán/hạn mức tìm kiếm")
-                        p.attempts, p.fell_back = attempts + [{"model": m.name, "outcome": "ungrounded"}], True
-                        return p
+        # Hết cả thang. Nếu đang bám nguồn mà toàn lỗi hạn mức: gọi thường MỘT lần để phân biệt hạn mức của công cụ
+        # tìm kiếm (không model nào bám được) với việc hết định mức/sập thật.
+        if search and attempts and all(a["outcome"].startswith("quota") or a["outcome"] in ("cooling", "not_found")
+                                       for a in attempts):
+            for m in self.ladder():
+                if self._cool.get(m.name, 0) > self._now():
+                    continue
+                p = self._try_model(m, json.dumps(plain).encode("utf-8"), [], False)
+                if p is not None:
+                    self._cool[SEARCH_KEY] = self._now() + SEARCH_BLOCK_S
+                    self._save_cache()
+                    if not allow_ungrounded:
+                        raise GroundingUnavailable(
+                            "đã hạ hết thang model nhưng bám nguồn Google Search vẫn bị 429 (gọi thường thì được) "
+                            "— cần bật thanh toán/hạn mức tìm kiếm")
+                    p.attempts, p.fell_back = attempts + [{"model": m.name, "outcome": "ungrounded"}], True
+                    return p
+                break
         raise AllModelsExhausted("hết thang model Gemini (định mức hoặc lỗi máy chủ)", attempts)
 
     @staticmethod

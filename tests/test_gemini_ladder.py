@@ -10,8 +10,8 @@ def test_parse_ten_la_va_ten_hop_le():
     assert (m.version, m.tier, m.preview) == ((3, 8), "pro", False)
     assert parse_model("gemini-2.5-flash-lite").tier == "flash-lite"
     assert parse_model("gemini-3-pro-preview").preview is True
-    for bad in ("", "gpt-4", "gemma-3-27b", "gemini-2.5-flash-image", "gemini-2.5-flash-tts",
-                "gemini-2.0-flash-live", "gemini-pro-latest", "text-embedding-004", "gemini-exp-1206"):
+    for bad in ("", "gpt-4", "gemini-2.5-flash-image", "gemini-2.5-flash-tts", "gemma-3-tts",
+                "gemini-2.0-flash-live", "gemma-3-tts", "text-embedding-004", "gemini-exp-1206"):
         assert parse_model(bad) is None, bad
 
 
@@ -40,3 +40,11 @@ def test_bat_dau_tu_bac_chon():
 def test_gop_bien_the_cung_phien_ban():
     lad = build_ladder(["gemini-2.0-flash-001", "gemini-2.0-flash", "gemini-2.0-flash-002"])
     assert names(lad) == ["gemini-2.0-flash"]
+
+
+def test_thang_di_het_ca_bi_danh_latest_va_gemma_o_cuoi():
+    lad = build_ladder(["gemma-4-31b-it", "gemini-flash-latest", "gemini-3.8-pro", "gemini-3.8-flash",
+                        "gemma-4-26b-a4b-it", "gemini-4-pro-preview", "gemini-pro-latest"])
+    assert names(lad) == ["gemini-3.8-pro", "gemini-3.8-flash", "gemini-4-pro-preview", "gemini-pro-latest",
+                          "gemini-flash-latest", "gemma-4-31b-it", "gemma-4-26b-a4b-it"]
+    assert [m.grounding for m in lad][-2:] == [False, False] and lad[0].grounding is True

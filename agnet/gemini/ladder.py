@@ -14,12 +14,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-TIER_RANK = {"pro": 0, "flash": 1, "flash-lite": 2}       # số nhỏ = cao hơn
+TIER_RANK = {"pro": 0, "flash": 1, "flash-lite": 2, "gemma": 3}       # số nhỏ = cao hơn
 _NAME = re.compile(r"^gemini-(\d+(?:\.\d+)*)-(pro|flash-lite|flash)(?:-(.+))?$")
 # phần đuôi cho biết model không dùng để sinh văn bản thường / hoặc chỉ là bí danh trùng lặp
 _SKIP_TAGS = ("image", "tts", "live", "audio", "embedding", "aqa", "robotics", "computer-use",
               "vision", "native", "customtools", "latest", "thinking")
 _PREVIEW_TAGS = ("preview", "exp")
+_ALIAS = re.compile(r"^gemini-(pro|flash-lite|flash)-latest$")      # bí danh trỏ tới bản mới nhất của bậc
+_GEMMA = re.compile(r"^gemma-(\d+(?:\.\d+)*)-(.+)$")
+_GEMMA_SKIP = ("tts", "image", "embedding", "vision")
 
 
 @dataclass(frozen=True)
@@ -29,14 +32,15 @@ class ModelInfo:
     tier: str
     preview: bool
     suffix: str = ""
+    grounding: bool = True    # False: model không có công cụ Google Search (Gemma) → chỉ dùng khi gọi KHÔNG bám nguồn
 
     def to_json(self) -> dict:
         return {"name": self.name, "version": list(self.version), "tier": self.tier,
-                "preview": self.preview, "suffix": self.suffix}
+                "preview": self.preview, "suffix": self.suffix, "grounding": self.grounding}
 
     @staticmethod
     def from_json(d: dict) -> "ModelInfo":
-        return ModelInfo(d["name"], tuple(d["version"]), d["tier"], bool(d["preview"]), d.get("suffix", ""))
+        return ModelInfo(d["name"], tuple(d["version"]), d["tier"], bool(d["preview"]), d.get("suffix", ""), bool(d.get("grounding", True)))
 
 
 def parse_model(name: str) -> ModelInfo | None:
@@ -44,7 +48,16 @@ def parse_model(name: str) -> ModelInfo | None:
     n = (name or "").strip()
     if n.startswith("models/"):
         n = n[len("models/"):]
-    m = _NAME.match(n.lower())
+    low = n.lower()
+    a = _ALIAS.match(low)
+    if a:                                                  # bí danh *-latest: cuối thang của bậc đó
+        return ModelInfo(low, (0,), a.group(1), True, "latest")
+    g = _GEMMA.match(low)
+    if g:
+        if any(t in g.group(2).split("-") for t in _GEMMA_SKIP):
+            return None
+        return ModelInfo(low, tuple(int(x) for x in g.group(1).split(".")), "gemma", False, g.group(2), False)
+    m = _NAME.match(low)
     if not m:
         return None
     ver, tier, suffix = m.group(1), m.group(2), m.group(3) or ""
@@ -67,7 +80,7 @@ def build_ladder(names, start_tier: str = "pro") -> list[ModelInfo]:
         m = parse_model(raw)
         if m is None:
             continue
-        key = (m.version, m.tier, m.preview)
+        key = (m.version, m.tier, m.preview, m.name if m.tier == "gemma" else "")
         if key not in best or _rank_variant(m) > _rank_variant(best[key]):
             best[key] = m
     start = TIER_RANK.get(start_tier, 0)
@@ -75,6 +88,7 @@ def build_ladder(names, start_tier: str = "pro") -> list[ModelInfo]:
 
     def order(m: ModelInfo):
         neg_version = tuple(-x for x in m.version)
-        return (m.preview, TIER_RANK[m.tier], neg_version)
+        gemma_last = m.tier == "gemma"                     # Gemma (không bám nguồn được) luôn ở cuối cùng
+        return (gemma_last, m.preview, TIER_RANK[m.tier], neg_version, tuple(-ord(c) for c in m.name) if gemma_last else ())
 
     return sorted(pool, key=order)

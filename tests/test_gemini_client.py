@@ -97,7 +97,7 @@ def test_tat_ha_bac_chi_dung_model_dau(tmp_path):
                     settings=Settings(gemini_fallback=False))
     with pytest.raises(AllModelsExhausted):
         c.generate("x")
-    assert fake.posts() == ["gemini-3.8-pro"]
+    assert set(fake.posts()) == {"gemini-3.8-pro"}          # không bao giờ xuống model khác khi tắt hạ bậc
 
 
 def test_khoa_sai_khong_ha_bac(tmp_path):
@@ -185,16 +185,16 @@ def _search_blocked_fake(models=("gemini-3.8-pro", "gemini-3.7-pro", "gemini-3.8
     return F({})
 
 
-def test_bam_nguon_bi_chan_khong_dot_thang_va_bao_dung_nguyen_nhan(tmp_path):
+def test_bam_nguon_429_ha_het_thang_roi_moi_ket_luan(tmp_path):
     from agnet.gemini import GroundingUnavailable
     fake = _search_blocked_fake()
     c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: 1e6)
     with pytest.raises(GroundingUnavailable):
         c.generate("x")
-    assert len(fake.posts()) == 3                    # 2 lần 429 + 1 lần gọi thường để phân biệt, KHÔNG đốt cả thang
+    assert len(fake.posts()) == 5                    # hạ hết 4 model (đều 429 khi bám nguồn) + 1 lần gọi thường để phân biệt
     with pytest.raises(GroundingUnavailable):        # lần sau: biết rồi, không gọi mạng nữa
         c.generate("y")
-    assert len(fake.posts()) == 3
+    assert len(fake.posts()) == 5
 
 
 def test_cho_phep_khong_bam_nguon_thi_tra_ket_qua_danh_dau(tmp_path):
@@ -220,3 +220,28 @@ def test_probe_bao_cao(tmp_path):
     def bad(method, url, h, b, t):
         return 403, b"denied"
     assert GeminiClient("K", cache_path=tmp_path / "n.json", transport=bad).probe()["key"] == "bad"
+
+
+def test_gemma_chi_dung_khi_goi_khong_bam_nguon(tmp_path):
+    names = ("gemini-3.8-flash", "gemma-4-31b-it")
+    models = {"models": [{"name": f"models/{n}", "supportedGenerationMethods": ["generateContent"]} for n in names]}
+
+    class F(Fake):
+        def __call__(self, method, url, headers, body, timeout):
+            if method == "GET":
+                return 200, json.dumps(models).encode()
+            self.calls.append((method, url))
+            return quota() if b"google_search" in body or ("flash" in url and self.flash_dead) else ok("gemma")
+    fake = F({})
+    fake.flash_dead = True
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=fake, clock=lambda: 1e6)
+    r = c.generate("x", search=False)                      # flash 429 → hạ tới tận Gemma
+    assert r.model == "gemma-4-31b-it" and r.fell_back
+    assert fake.posts() == ["gemini-3.8-flash", "gemma-4-31b-it"]
+    fake.calls.clear()
+    fake.flash_dead = False
+    c2 = GeminiClient("K", cache_path=tmp_path / "n.json", transport=fake, clock=lambda: 1e6)
+    from agnet.gemini import GroundingUnavailable
+    with pytest.raises(GroundingUnavailable):
+        c2.generate("x")                                   # bám nguồn: Gemma bị bỏ qua, không bao giờ được gọi
+    assert "gemma-4-31b-it" not in fake.posts()[:-1]
