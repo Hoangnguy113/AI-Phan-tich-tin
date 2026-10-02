@@ -3,9 +3,10 @@
   "theme": "system",
   "concurrency": 3,
   "gemini_provider": "gemini_api",
-  "gemini_model": "gemini-2.5-flash",
+  "gemini_model": "gemini-flash-latest",
   "gemini_auto_update": true,
   "gemini_fallback": true,
   "gemini_tier": "pro",
-  "gemini_refresh_hours": 24
+  "gemini_refresh_hours": 24,
+  "gemini_require_grounding": true
 }
