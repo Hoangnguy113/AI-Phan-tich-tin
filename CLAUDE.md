@@ -20,6 +20,7 @@ python -m agnet budget --minutes 10 --wpm 160 --weights 1,3,3,3,2,1
 python -m agnet count --wpm 140 --file voiceover.txt
 python -m agnet dedup "<đề tài>"  |  claim <flow_id> "<đề tài>"
 python -m agnet run <flow_id>            # CHẠY THẬT, tốn chi phí API
+python -m agnet gui                      # phần mềm quản lý (PySide6): thanh trái 10 mục
 python -m agnet doctor                   # kiểm tra điều kiện chạy tự động (không tốn API)
 python -m agnet serve                    # daemon: lịch + bù lịch + log + Telegram
 python -m agnet status [--flow X]        # lịch sử chạy & chi phí
@@ -41,24 +42,29 @@ python -m agnet catchup [flow_id] [--force]   # chạy bù luồng hôm nay chư
 .claude/skills/   agnet-script-director · qa-editor · trend-scoring · koc-studio · hook-title · flow-config
 agnet/core/       models (Flow) · timing · scoring · validate
 agnet/koc/        master_prompt · adapters · export · realism_engine.json
-agnet/pipeline/   agents (nạp + SdkRunner) · pipeline (điều phối, vòng QA ≤ 2) · export
+agnet/pipeline/   agents (nạp, SdkRunner, chặn công cụ ghi) · pipeline (điều phối, vòng QA ≤ 2) · engine (định tuyến claude/gemini, thử lại OAuth) · survey · export
+agnet/gemini/     client Gemini (khoá AI Studio) · ladder (thang model tự cập nhật, hạ bậc khi 429/503) · bám nguồn Google Search
+agnet/commander/  hợp đồng nhiệm vụ · nghiệm thu bằng code · thử lại 1 lần · tỉ lệ đạt theo agent
+agnet/ui/         ứng dụng desktop: sidebar + 10 trang (điều khiển, kho kịch bản, luồng, Gemini, đội agent, hợp đồng, KOC, chi phí, chung, tài khoản)
+agnet/runner.py · core/settings.py   chạy 1 luồng · cài đặt chung (config/app_settings.json)
 agnet/storage/    db (SQLite: chống trùng, chi phí)
 agnet/scheduler.py  APScheduler từ flows.yaml (sync: thêm/sửa/gỡ job)
 agnet/daemon.py   vận hành: khoá 1 bản chạy · bù lịch · nạp lại flows.yaml · trần thời gian · báo lỗi
 agnet/notify.py   Telegram + webhook (không bao giờ ném lỗi ra ngoài, không log token)
 agnet/logging_setup.py · agnet/env.py   log ngày trong logs/ (che khoá) · nạp .env
 scripts/          start_agnet.bat · run_flow.bat · register_task.ps1 · unregister_task.ps1 (Task Scheduler)
-config/           flows.yaml · scoring.yaml · characters.yaml · characters/*.json
+config/           flows.yaml · scoring.yaml · characters.yaml · characters/*.json · app_settings.json · gemini_models.json (cache, sinh tự động)
 schemas/          script.schema.json
 tests/            xem `python -m pytest -q`
 ```
 
 ## Trạng thái — nói đúng những gì CHƯA kiểm chứng
-- **Đã kiểm bằng test** (109 test): cấu hình luồng, toán thời lượng, chấm điểm, chống trùng, cổng `validate`, hợp đồng KOC, điều phối (agent giả lập), lịch chạy, và lớp vận hành — quyết định bù lịch, khoá một bản chạy, trần thời gian mỗi lần chạy, nạp lại `flows.yaml` khi file đổi, định dạng & gửi thông báo (transport giả).
-- **Lần chạy thật 01/10/2026 07:38 bỏ dở**: đã có `ANTHROPIC_API_KEY`, 4 lượt gọi agent tốn $1,16 rồi tiến trình không kết thúc (bản ghi `runs` còn `running`). Chưa biết nguyên nhân treo ở agent nào — vì vậy daemon nay có `run_timeout_min` (mặc định 180 phút) và đánh dấu `interrupted`. Lần chạy thật tiếp theo nên theo dõi `logs/agnet.log` để xem agent nào chậm.
-- **Chưa gửi Telegram thật**: `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` trong `.env` đang trống; mã gửi chỉ được kiểm bằng transport giả. `agnet doctor` sẽ báo thiếu.
-- **Chưa đăng ký tác vụ Windows**: script `scripts/register_task.ps1` chưa được chạy trên máy này (phải chạy từ PowerShell trên Windows, không chạy được từ phiên này).
-- **Chưa chạy với API thật**: `SdkRunner` mới được kiểm là khớp chữ ký SDK, **chưa** có một lần chạy thật; chất lượng viết/QA của agent chưa đo. Chi phí thực tế/luồng/ngày chưa biết — chạy 1 luồng 1–2 kịch bản trước, xem `cost_ledger`, rồi mới chốt `max_cost_usd_per_day` và `daily_quota`.
-- **Chưa có**: connector số liệu thật (YouTube Data API, Trends, RSS — scout hiện chỉ có prompt + WebSearch, **không có** view/giờ chính xác), Web UI, Analytics Learner, embedding/pgvector, Telegram. Google Trends và TikTok Creative Center không có API chính thức — thiết kế scout chịu lỗi từng nguồn.
-- Nhân vật KOC mới có **chữ** (`status: draft`); chưa có ảnh gốc/bảng 9 ảnh nên chưa được bật cho luồng thật.
-- Chốt `script.json` với phần mềm dựng video thật **trước** khi đầu tư thêm phần xuất.
+- **Đã kiểm bằng test** (381 test, 02/10/2026): cấu hình luồng, toán thời lượng, chấm điểm, chống trùng, cổng `validate`, hợp đồng KOC, điều phối (agent giả lập), lịch chạy, lớp vận hành, **client Gemini** (thang model, hạ bậc 429/503/400, bám nguồn, cooldown, khoá luồng — bằng transport giả), **hợp đồng & nghiệm thu**, **định tuyến engine**, **10 trang giao diện** (offscreen) và các lỗi do nhóm kiểm tra tìm ra (`tests/test_hardening.py`).
+- **Đo thật với khoá Google AI Studio (02/10/2026)**: liệt kê 44 model; gọi thường chạy (200); `google_search` bám nguồn bị **429 trên mọi model** (gói miễn phí) → theo quyết định người dùng, Gemini **bắt buộc bám nguồn** (`gemini_require_grounding`): không bám được thì nguồn bị loại, Claude không làm thay, khảo sát rỗng thì lần chạy dừng. Muốn chạy được cần bật thanh toán/hạn mức tìm kiếm Google rồi bấm "Kiểm tra khóa" ở mục Gemini.
+- **Chưa có một lần chạy luồng trọn vẹn nào** với pipeline hiện tại: chưa đo chi phí/thời gian một kịch bản, chưa biết gói Claude có chịu nổi 20 tin/ngày, `max_cost_usd_per_day: 1` và `daily_quota: 1` trong `flows.yaml` vẫn là giá trị thử (chắc chắn quá thấp). Lần chạy thật 01/10 từng bỏ dở (treo, tốn $1,16); lần 02/10 chết vì đua làm mới token OAuth — B4 đã thêm thử lại lùi dần + khởi động ấm nhưng **chưa kiểm bằng lần chạy thật**.
+- **Hạn chế đã biết (chưa sửa)**: nghiệm thu bám nguồn khớp theo **tên miền** (URL Gemini trả là chuyển hướng) nên URL bịa trên miền đã được bám vẫn lọt; `published_at` do model tự khai; timeout không dừng được luồng Gemini đang chạy (`to_thread`); scoring.py (đòi evidence) chưa được pipeline gọi, việc "từ chối chấm" dựa vào prompt agent 07; chuỗi trạng thái dựng lúc chạy chưa dịch English.
+- **Chưa gửi Telegram thật** (`TELEGRAM_*` trống, chỉ kiểm bằng transport giả); **chưa đăng ký tác vụ Windows** (`scripts/register_task.ps1`).
+- **Chưa có**: connector số liệu thật (YouTube Data API, Trends, RSS — `agnet/connectors/` rỗng), Analytics Learner, embedding/pgvector. Google Trends và TikTok Creative Center không có API chính thức.
+- Nhân vật KOC mới có **chữ** (`status: draft`); chưa có ảnh gốc/bảng 9 ảnh nên chưa bật được cho luồng thật.
+- Chốt `script.json` với phần mềm dựng video thật **trước** khi đầu tư thêm phần xuất (schema chưa đổi trong đợt này).
+- **Bảo mật**: agent đọc web không có Bash, không agent nào có Write/Edit (cả hai bị `load_agents` chặn); khoá Gemini chỉ ở `.env` (ghi nguyên tử, 0600), che trong log. Khoá dùng thử đã xuất hiện trong cuộc trò chuyện — nên thu hồi và tạo khoá mới.

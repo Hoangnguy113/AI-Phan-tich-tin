@@ -1017,7 +1017,7 @@ Thêm vào **Web UI** (mục 12): màn hình **Quản lý nhân vật** — xem/
 | **(a) Bật thanh toán / hạn mức tìm kiếm Google** | Nâng gói Google AI Studio để `google_search` có hạn mức | Giữ nguyên thiết kế v1.2: 7 scout chạy Gemini có bám nguồn, nhẹ gánh hạn mức Claude | Phát sinh chi phí Google (chưa đo: số lượt tìm kiếm/ngày × giá); phải chạy lại `probe()` để chắc 429 đã hết |
 | **(b) Giữ khảo sát bằng Claude WebSearch** | Scout vẫn là agent Claude như v1.1; Gemini chỉ làm việc **không cần nguồn**: phân loại, gom cụm, tóm tắt, viết nháp | Không tốn thêm; không phụ thuộc hạn mức tìm kiếm; hợp quy tắc cứng | Tiêu hao hạn mức gói Claude nhiều hơn (chưa biết có chịu nổi 20 tin/ngày — 18.11) |
 
-Trong lúc chờ quyết định, **mặc định thi hành là (b)** vì không cần thay đổi gì và không vi phạm quy tắc cứng. Chuyển sang (a) chỉ là đổi `engine` của agent trong giao diện "Đội agent" (18.9) sau khi `probe()` xác nhận bám nguồn chạy được.
+Đã chốt (a) (xem khung ở đầu mục này): `gemini_provider=gemini_api`, `gemini_require_grounding=true`. Khi bám nguồn chưa chạy được, luồng khảo sát dừng thay vì chuyển sang Claude.
 
 ### 18.4 Xác thực & thang model Gemini
 
@@ -1065,13 +1065,13 @@ Mỗi agent **sở hữu một tập tệp riêng** để không ghi đè nhau v
 | Luồng | Phạm vi | Tệp sở hữu | Trạng thái |
 |---|---|---|---|
 | B1 Gemini client | `GeminiClient`, thang model, bám nguồn, `probe()`, transport giả | `agnet/gemini/*`, `tests/test_gemini_*` | **Xong** + đã đo thật (18.2) |
-| B2 Hợp đồng & nghiệm thu | `TaskContract`, nghiệm thu bằng code, đo `compliance` | `agnet/commander/*`, `tests/test_commander_*` | Đang làm — sẽ cập nhật khi agent báo |
-| B3 Agent Gemini | khai `engine` cho 7 agent, viết lại prompt theo hợp đồng; **phụ thuộc quyết định 18.3** | `.claude/agents/01–05,08,09`, `tests/test_agents_files.py` | Đang làm — sẽ cập nhật khi agent báo |
-| UI-Gemini | Mục Gemini trên giao diện: trạng thái khoá, thang model, `probe()`, nghỉ hạn mức | `agnet/ui/page_gemini.py` (+ nối trong `app.py`) | Đang làm |
-| Kế hoạch | Mục 18–19 tài liệu | `KE_HOACH_AGNET.md` | Đang làm (bản này) |
-| B4 Nối pipeline | định tuyến `engine`, `concurrency`, thử lại OAuth, khởi động ấm, quota 20 | `agnet/pipeline/*`, `agnet/runner.py` | Kế hoạch (chờ B2) |
-| B5 Màn hình còn lại | Đội agent, Hợp đồng & tỉ lệ đạt, Nhân vật KOC, Chi phí & hạn mức | `agnet/ui/page_agents.py`, `page_contracts.py`, `page_koc.py`, `page_cost.py` | Kế hoạch |
-| B6 Kiểm chứng | GĐ3–GĐ4; chạy thử 1 tin thật, báo cáo chi phí & agent chậm | `tests/*`, báo cáo | Kế hoạch |
+| B2 Hợp đồng & nghiệm thu | `TaskContract`, nghiệm thu bằng code, đo `compliance` | `agnet/commander/*`, `tests/test_commander_*` | **ĐÃ XONG** (02/10) |
+| B3 Agent Gemini | khai `engine` cho 7 agent, viết lại prompt theo hợp đồng; **phụ thuộc quyết định 18.3** | `.claude/agents/01–05,08,09`, `tests/test_agents_files.py` | **ĐÃ XONG** (02/10) |
+| UI-Gemini | Mục Gemini trên giao diện: trạng thái khoá, thang model, `probe()`, nghỉ hạn mức | `agnet/ui/page_gemini.py` (+ nối trong `app.py`) | **ĐÃ XONG** |
+| Kế hoạch | Mục 18–19 tài liệu | `KE_HOACH_AGNET.md` | **ĐÃ XONG** |
+| B4 Nối pipeline | định tuyến `engine`, `concurrency`, thử lại OAuth, khởi động ấm, quota 20 | `agnet/pipeline/*`, `agnet/runner.py` | **ĐÃ XONG** (chưa chạy thật) |
+| B5 Màn hình còn lại | Đội agent, Hợp đồng & tỉ lệ đạt, Nhân vật KOC, Chi phí & hạn mức | `agnet/ui/page_agents.py`, `page_contracts.py`, `page_koc.py`, `page_cost.py` | **ĐÃ XONG** |
+| B6 Kiểm chứng | GĐ3–GĐ4; chạy thử 1 tin thật, báo cáo chi phí & agent chậm | `tests/*`, báo cáo | GĐ3–GĐ4 đã chạy; **chạy thử 1 tin thật CHƯA** (bị chặn: bám nguồn 429) |
 
 ### 18.9 Bản đồ giao diện (PySide6, thanh điều hướng trái)
 
@@ -1084,11 +1084,11 @@ Thanh trái (`agnet/ui/sidebar.py`, rộng 210 px, phím nhanh Ctrl+1…9). Hi�
 | 3 | Cài đặt luồng (`page_flows.py`, `flows_store.py`) | Hiện có | Chủ đề, nền tảng, thời lượng, giờ chạy + múi giờ, số tin 1–50, trần chi phí/ngày, KOC | `config/flows.yaml` |
 | 4 | Cài đặt chung (`page_settings.py`, `env_store.py`) | Hiện có | Ngôn ngữ, chủ đề, số agent song song 1–8, nhà cung cấp Gemini, khoá (che) | `config/app_settings.json`; khoá trong `.env` |
 | 5 | Tài khoản Claude (`page_account.py`, `auth.py`) | Hiện có | Trạng thái đăng nhập, đăng nhập/đăng xuất, cảnh báo khoá API | Phiên đăng nhập của Claude CLI (không lưu ở dự án) |
-| 6 | **Gemini** | Đang làm (UI-Gemini) | Bật/tắt, xem thang model và model đang nghỉ, nút `probe()`, bật/tắt `gemini_fallback`, chu kỳ làm mới | `config/app_settings.json`; trạng thái nghỉ ở `config/gemini_models.json`; khoá `.env` |
-| 7 | **Đội agent** | Kế hoạch | Xem & sửa engine (`claude`/`gemini`) và **model của từng agent**, bật/tắt agent; mở prompt để đọc | Frontmatter `.claude/agents/*.md` (code ghi, không để LLM ghi); thay đổi qua ghi nguyên tử + test `test_agents_files` |
-| 8 | **Hợp đồng & tỉ lệ đạt** | Kế hoạch | Số mục tối thiểu, nguồn bắt buộc, cửa sổ tuổi tin theo agent; xem `compliance` pass/fail theo ngày | Cấu hình hợp đồng (`config/`, do B2 chốt); số đo ở `agnet.db` |
-| 9 | **Nhân vật KOC** | Kế hoạch | Xem/sửa `identity`, xem ảnh tham chiếu, gán nhân vật cho luồng, xem prompt từng cảnh. **Không cho sửa** Lớp B, `negative`, `consistency_lock` (quy tắc cứng số 5) | `config/characters/*.json`; gán ở `flows.yaml` |
-| 10 | **Chi phí & hạn mức** | Kế hoạch | Trần `max_cost_usd_per_day`, hạn mức Gemini còn lại, cảnh báo gần trần | `flows.yaml`; số liệu ở `cost_ledger` trong `agnet.db` |
+| 6 | **Gemini** | Có (02/10) | Bật/tắt, xem thang model và model đang nghỉ, nút `probe()`, bật/tắt `gemini_fallback`, chu kỳ làm mới | `config/app_settings.json`; trạng thái nghỉ ở `config/gemini_models.json`; khoá `.env` |
+| 7 | **Đội agent** | Có (02/10) | Xem & sửa engine (`claude`/`gemini`) và **model của từng agent**, bật/tắt agent; mở prompt để đọc | Frontmatter `.claude/agents/*.md` (code ghi, không để LLM ghi); thay đổi qua ghi nguyên tử + test `test_agents_files` |
+| 8 | **Hợp đồng & tỉ lệ đạt** | Có (02/10) | Số mục tối thiểu, nguồn bắt buộc, cửa sổ tuổi tin theo agent; xem `compliance` pass/fail theo ngày | Cấu hình hợp đồng (`config/`, do B2 chốt); số đo ở `agnet.db` |
+| 9 | **Nhân vật KOC** | Có (02/10) | Xem/sửa `identity`, xem ảnh tham chiếu, gán nhân vật cho luồng, xem prompt từng cảnh. **Không cho sửa** Lớp B, `negative`, `consistency_lock` (quy tắc cứng số 5) | `config/characters/*.json`; gán ở `flows.yaml` |
+| 10 | **Chi phí & hạn mức** | Có (02/10) | Trần `max_cost_usd_per_day`, hạn mức Gemini còn lại, cảnh báo gần trần | `flows.yaml`; số liệu ở `cost_ledger` trong `agnet.db` |
 
 Với 10 mục, phím Ctrl+1…9 không phủ hết mục 10; cần bổ sung phím hoặc gộp mục khi làm B5.
 
@@ -1115,15 +1115,15 @@ Mọi điều khiển chỉ **ghi cấu hình**, không ghi đầu ra kịch b�
 
 ## 19. Bước tiếp theo
 
-Trạng thái lộ trình (B1–B6 ở 18.8): **B1 xong; B2, B3, UI-Gemini đang làm; B4–B6 chưa bắt đầu.**
+Trạng thái (02/10/2026, 381 test xanh): **B1–B5 và 10 mục giao diện đã có mã + test; GĐ3 (kiểm kê, rà mã, bảo mật, đối chiếu quy tắc cứng) đã chạy và các lỗi tìm được đã vá (`tests/test_hardening.py`); B6 (chạy thử 1 tin thật) CHƯA làm** vì bám nguồn Gemini đang bị 429.
 
 | # | Việc | Ai | Trạng thái |
 |---|---|---|---|
-| 1 | **Chọn phương án (a) hay (b)** ở 18.3 — nút thắt chặn B3/B4 | Người dùng | Chờ quyết định |
-| 2 | Hoàn tất GĐ1: B2, B3, UI-Gemini; cập nhật bảng 18.8 theo báo cáo từng agent | Các agent GĐ1, Tổng chỉ huy commit | Đang làm |
-| 3 | GĐ2: B4 nối pipeline (thử lại OAuth, khởi động ấm, `concurrency`, định tuyến `engine`) rồi màn hình Đội agent / Hợp đồng / KOC / Chi phí | Agent B4, B5 | Kế hoạch |
-| 4 | GĐ3–GĐ4: kiểm kê tệp, test, rà khoá, đối chiếu quy tắc cứng; tổng đánh giá + phản biện độc lập | Nhóm kiểm tra | Kế hoạch |
-| 5 | Đặt lại `max_cost_usd_per_day` và `daily_quota`, chạy thử **1 tin thật**, đọc `logs/agnet.log` và `cost_ledger` để biết chi phí và agent chậm | Người dùng + B6 | Kế hoạch |
-| 6 | Chốt schema `script.json` với phần mềm dựng video thật trước khi đầu tư thêm phần xuất | Người dùng | Chưa làm |
+| 1 | Bật thanh toán/hạn mức tìm kiếm Google cho khoá, bấm "Kiểm tra khóa" (mục Gemini) tới khi báo "bám nguồn: ok" | Người dùng | **Chặn mọi lần chạy thật** |
+| 2 | Thu hồi khoá Gemini đã lộ trong chat, tạo khoá mới, dán vào mục Gemini | Người dùng | Cần làm |
+| 3 | Đặt lại `max_cost_usd_per_day` (hiện 1) và `daily_quota` (hiện 1); `run_timeout_min` 240 cho 20 tin | Người dùng | Cần làm |
+| 4 | Chạy thử **1 tin thật**, đọc `logs/agnet.log` + `cost_ledger` để biết chi phí và agent chậm; kiểm chứng thử lại OAuth/khởi động ấm | Người dùng + B6 | Chưa làm |
+| 5 | Siết nghiệm thu bám nguồn (hiện khớp theo tên miền) dựa trên dữ liệu `groundingMetadata` thật; nối `core/scoring.py` vào pipeline; dừng được luồng Gemini khi timeout | Dev | Chưa làm (cần số liệu thật) |
+| 6 | Chốt schema `script.json` với phần mềm dựng video thật | Người dùng | Chưa làm |
 | 7 | Chọn 1 nhân vật KOC (mục 17.7) → ảnh gốc + bảng 9 ảnh → chạy thử 3 cảnh trước khi bật `koc.enabled` | Người dùng | Chưa làm |
-| 8 | Đăng ký tác vụ Windows (`scripts/register_task.ps1`) và nhập Telegram vào `.env` khi chạy tự động | Người dùng | Chưa làm |
+| 8 | Đăng ký tác vụ Windows (`scripts/register_task.ps1`), nhập Telegram vào `.env` | Người dùng | Chưa làm |

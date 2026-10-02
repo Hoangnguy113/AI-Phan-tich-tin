@@ -6,18 +6,18 @@ Hệ thống đa agent săn xu hướng & viết kịch bản đạo diễn vide
 ```
 python -m venv .venv && .venv\Scripts\activate      # Windows
 pip install -e ".[dev]"
-copy .env.example .env                               # điền ANTHROPIC_API_KEY
+copy .env.example .env                               # (tuỳ chọn) GEMINI_API_KEY; Claude dùng tài khoản đã đăng nhập
 python -m pytest -q
 python -m agnet flows
+python -m agnet gui                                  # phần mềm quản lý: thanh trái 10 mục
 ```
 Dùng thủ công (không cần API riêng): mở thư mục này trong Claude, các skill/agent ở `.claude/` tự nạp.
 Chạy tự động: `python -m agnet run <flow_id>` hoặc `python -m agnet serve`.
 
 ## Xác thực để chạy thật
-`SdkRunner` dùng Claude Agent SDK, cần **một** trong hai:
-1. Biến môi trường `ANTHROPIC_API_KEY` (đặt trong `.env` hoặc hệ thống — bạn tự điền, đừng gửi khoá qua chat); hoặc
-2. Đã đăng nhập Claude Code trên máy chạy (`claude` → `/login`).
-Thử nhanh: `python -m agnet run suckhoe-yt-sang` sẽ báo `Not logged in` nếu chưa xác thực.
+- **Claude**: dùng tài khoản đã đăng nhập (`claude auth login`, hoặc nút "Đăng nhập" ở mục *Tài khoản Claude*) — **không cần API key**. Nếu còn `ANTHROPIC_API_KEY` thì khoá được ưu tiên hơn tài khoản; giao diện cảnh báo và loại khoá khỏi tiến trình con.
+- **Gemini** (khảo sát thị trường có bám nguồn): khoá Google AI Studio trong `.env` (`GEMINI_API_KEY`), nhập ở mục *Gemini*/*Cài đặt chung*. Bám nguồn Google Search cần gói có hạn mức tìm kiếm (bật thanh toán); không có thì luồng khảo sát dừng, đúng quy tắc "bắt buộc bám nguồn". Bấm *Kiểm tra khóa* để xác nhận.
+- Đừng gửi khoá qua chat; nếu đã lỡ gửi, hãy thu hồi và tạo khoá mới.
 
 ## Chạy tự động hằng ngày (Windows)
 ```powershell
