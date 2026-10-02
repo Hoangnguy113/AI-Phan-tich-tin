@@ -267,8 +267,8 @@ class GeminiClient:
                 return res
         # Hết cả thang. Nếu đang bám nguồn mà toàn lỗi hạn mức: gọi thường MỘT lần để phân biệt hạn mức của công cụ
         # tìm kiếm (không model nào bám được) với việc hết định mức/sập thật.
-        if search and attempts and all(a["outcome"].startswith("quota") or a["outcome"] in ("cooling", "not_found")
-                                       for a in attempts):
+        if search and any(a["outcome"].startswith("quota") for a in attempts) and not any(
+                a["outcome"] == "ok" for a in attempts):          # lẫn 429/503/lỗi khác vẫn phân biệt được
             for m in self.ladder():
                 if self._cool.get(m.name, 0) > self._now():
                     continue

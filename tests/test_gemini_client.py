@@ -245,3 +245,27 @@ def test_gemma_chi_dung_khi_goi_khong_bam_nguon(tmp_path):
     with pytest.raises(GroundingUnavailable):
         c2.generate("x")                                   # bám nguồn: Gemma bị bỏ qua, không bao giờ được gọi
     assert "gemma-4-31b-it" not in fake.posts()[:-1]
+
+
+def test_loi_hon_hop_429_503_400_van_ha_het_thang_toi_model_chay_duoc(tmp_path):
+    c, fake, _ = mk(tmp_path, {"gemini-3.8-pro": [quota()], "gemini-3.7-pro": [(503, b""), (503, b""), (503, b"")],
+                               "gemini-3.8-flash": [(400, b"tool not supported")], "gemini-3.8-flash-lite": ok("cuối")})
+    r = c.generate("x")
+    assert r.model == "gemini-3.8-flash-lite" and r.fell_back
+    assert [a["outcome"] for a in r.attempts] == ["quota_minute", "server_503", "http_400", "ok"]
+
+
+def test_het_thang_lan_429_503_van_phan_biet_duoc_hang_muc_tim_kiem(tmp_path):
+    from agnet.gemini import GroundingUnavailable
+
+    class F(Fake):
+        def __call__(self, method, url, headers, body, timeout):
+            if method == "GET":
+                return super().__call__(method, url, headers, body, timeout)
+            self.calls.append((method, url))
+            if b"google_search" in body:
+                return (503, b"") if "3.7" in url else quota()
+            return ok("thường")
+    c = GeminiClient("K", cache_path=tmp_path / "m.json", transport=F({}), clock=lambda: 1e6, sleep=lambda s: None)
+    with pytest.raises(GroundingUnavailable):
+        c.generate("x")
