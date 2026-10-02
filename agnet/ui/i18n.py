@@ -32,7 +32,7 @@ EN: dict[str, str] = {
     "Cài đặt chung": "General settings",
     "Tài khoản Claude": "Claude account",
     "Quản lý luồng kịch bản": "Script flow management",
-    "Ctrl+1…5: chuyển mục": "Ctrl+1…5: switch section",
+    "Ctrl+1…6: chuyển mục": "Ctrl+1…6: switch section",
     # chung
     "Lưu": "Save",
     "Bỏ thay đổi": "Discard changes",
@@ -97,6 +97,26 @@ EN: dict[str, str] = {
     "Khóa Gemini API:": "Gemini API key:",
     "Dán khóa mới (để trống = giữ khóa hiện tại)": "Paste a new key (leave empty to keep the current one)",
     "Xóa khóa": "Remove key",
+    # trang Gemini
+    "Khóa và trạng thái": "Key & status",
+    "Kiểm tra khóa": "Check key",
+    "Bấm “Kiểm tra khóa” để thử khóa Gemini.": "Press “Check key” to test the Gemini key.",
+    "Chưa có khóa — nhập ở trang Cài đặt chung.": "No key — enter it on the General settings page.",
+    "Thang model": "Model ladder",
+    "Thứ tự": "Order",
+    "Bậc": "Tier",
+    "Phiên bản": "Version",
+    "Tải lại danh sách model": "Reload model list",
+    "Chính sách": "Policy",
+    "Bậc ưu tiên:": "Preferred tier:",
+    "Pro (mạnh nhất)": "Pro (most capable)",
+    "Flash (cân bằng)": "Flash (balanced)",
+    "Flash-Lite (rẻ, nhanh)": "Flash-Lite (cheap, fast)",
+    "Tự cập nhật danh sách model từ Google": "Auto-update the model list from Google",
+    "Hạ xuống model thấp hơn khi hết định mức": "Fall back to a lower model when quota runs out",
+    "Tải lại danh sách mỗi:": "Reload list every:",
+    "  giờ": "  hours",
+    "Lưu chính sách": "Save policy",
 }
 
 

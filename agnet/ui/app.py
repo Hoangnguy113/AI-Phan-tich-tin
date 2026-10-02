@@ -11,6 +11,7 @@ from ..env import load_env
 from . import i18n, theme
 from .page_account import AccountPage
 from .page_flows import FlowsPage
+from .page_gemini import GeminiPage
 from .page_library import LibraryPage
 from .page_runs import RunsPage
 from .page_settings import SettingsPage
@@ -30,12 +31,14 @@ class MainWindow(QMainWindow):
         self.flows = FlowsPage(flows_path)
         self.general = SettingsPage(settings_path, env_path)
         self.account = AccountPage(flows_path, db_path)
+        self.gemini = GeminiPage(settings_path, env_path)
+        self.gemini.changed.connect(self.apply_settings)
         self.flows.changed.connect(self.runs.refresh)
         self.general.changed.connect(self.apply_settings)
 
-        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…5: chuyển mục")
+        self.shell = SidebarShell("Agnet", "Quản lý luồng kịch bản", "Ctrl+1…6: chuyển mục")
         for title, page in (("Bảng điều khiển", self.runs), ("Kho kịch bản", self.library),
-                            ("Cài đặt luồng", self.flows), ("Cài đặt chung", self.general),
+                            ("Cài đặt luồng", self.flows), ("Gemini", self.gemini), ("Cài đặt chung", self.general),
                             ("Tài khoản Claude", self.account)):
             self.shell.add_page(title, page)
         self.setCentralWidget(self.shell)
@@ -48,6 +51,7 @@ class MainWindow(QMainWindow):
         if app is not None:
             theme.apply_theme(app, s.theme)
         i18n.apply(self, s.language)
+        self.gemini.reload()
 
 
 def run(flows_path: str | Path = "config/flows.yaml", db_path: str | Path = "agnet.db") -> int:

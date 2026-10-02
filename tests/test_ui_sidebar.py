@@ -29,13 +29,13 @@ def test_chon_muc_doi_trang():
     assert sh.stack.currentWidget() is b and got == [1]
 
 
-def test_cua_so_chinh_co_5_muc_va_dich(tmp_path):
+def test_cua_so_chinh_co_6_muc_va_dich(tmp_path):
     flows = tmp_path / "flows.yaml"
     flows.write_text('flows:\n  - id: a\n    name: "A"\n    topic: "t"\n    daily_quota: 1\n    schedule: ["0 5 * * *"]\n', encoding="utf-8")
     w = MainWindow(flows, tmp_path / "a.db", tmp_path / "s.json", tmp_path / ".env", tmp_path / "out")
     nav = w.shell.nav
     assert [nav.item(i).text() for i in range(nav.count())][:2] == ["Bảng điều khiển", "Kho kịch bản"]
-    assert nav.count() == 5
+    assert nav.count() == 6
     i18n.apply(w, "en")
     assert nav.item(0).text() == "Dashboard"
     i18n.apply(w, "vi")

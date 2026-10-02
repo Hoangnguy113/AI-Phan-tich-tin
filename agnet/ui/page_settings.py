@@ -6,6 +6,7 @@ Khoá Gemini lưu vào .env (không vào app_settings.json), ô nhập luôn che
 from __future__ import annotations
 
 import shutil
+from dataclasses import replace
 from pathlib import Path
 
 from PySide6.QtCore import Signal
@@ -109,9 +110,10 @@ class SettingsPage(QWidget):
         self._provider_changed()
 
     def current(self) -> S.Settings:
-        return S.Settings(language=self.language.currentData(), theme=self.theme.currentData(),
-                          concurrency=self.concurrency.value(), gemini_provider=self.provider.currentData(),
-                          gemini_model=self.model.text()).normalized()
+        # Bắt đầu từ cài đặt đã lưu để KHÔNG đè các trường do trang khác sở hữu (chính sách Gemini ở trang Gemini).
+        return replace(S.load(self.settings_path), language=self.language.currentData(),
+                       theme=self.theme.currentData(), concurrency=self.concurrency.value(),
+                       gemini_provider=self.provider.currentData(), gemini_model=self.model.text()).normalized()
 
     def _provider_changed(self) -> None:
         p = self.provider.currentData()
